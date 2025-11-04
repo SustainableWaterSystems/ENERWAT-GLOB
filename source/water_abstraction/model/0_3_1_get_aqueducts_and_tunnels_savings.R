@@ -22,8 +22,6 @@ n.countries <- list.dirs(inputDirElevation, full.names = F, recursive = F)
 
 list.countries <- list()
 
-
-
 for(i in seq(length(n.countries))){
   
   replaceMessage('Gathering bypass information...')

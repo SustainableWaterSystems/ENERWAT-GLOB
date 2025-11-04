@@ -8,14 +8,15 @@ library(dplyr)
 replaceMessage <- function(x, width = 80)
 {
   message("\r", rep(" ", times = width - length(x)), "\r", appendLF = F)
-  message(x, appendLF = F)
+  message(paste0(x, "                                  "), appendLF = F)
 }
 
 inputDir <- '../../../../output/water_abstraction/model/ibwt/0_elevation_profiles/'
 
-inputDirElevation <- paste0(inputDir, '2_elevation_with_infrastructure/')
+inputDirElevation <- paste0(inputDir, '1_ibwt_starting_points/')
 
 outputDir <- paste0(inputDir, '3_pumping_elevations/')
+dir.create(outputDir, recursive = T, showWarnings = F)
 
 n.countries <- list.dirs(inputDirElevation, full.names = F, recursive = F)
 
@@ -44,36 +45,33 @@ for(i in seq(length(n.countries))){
     
     for(k in seq(length(segments.n))){
       
+      replaceMessage(paste0('Country: ', country, ' - ',
+                            'Transfer: ', transfer.name, ' - ',
+                            'Segment: ', k, '/', length(segments.n)))
+      
       segment.elevation.data <- read.csv(paste0(segments.folder, segments.n[k]))
       
       intake.type <- segment.elevation.data$Subject[1]
       
-      intake.elevation <- segment.elevation.data$elevation.aster.m[1]
+      intake.elevation <- segment.elevation.data$elevation.aster.m[
+        which(!is.na(segment.elevation.data$Subject))
+      ]
       
       #### get various statistics of the segment
       maximum.elevation <- max(segment.elevation.data$elevation.aster.m)
       
-      minimum.elevation <- min(segment.elevation.data$elevation.aster.m)
-      
       pumping.lift <- maximum.elevation - intake.elevation
-      
-      power.drop <- intake.elevation - minimum.elevation
       
       segment.length <- unique(segment.elevation.data$segment.length.km)
       
       maximum.location <- which(
         segment.elevation.data$elevation.aster.m == maximum.elevation)
       
-      minimum.location <- which(
-        segment.elevation.data$elevation.aster.m == minimum.elevation)
-      
       if(length(maximum.location)>1){
         maximum.location <- maximum.location[length(maximum.location)]
       }
       
       distance.to.maximum <- segment.elevation.data$distance.km.total[maximum.location]
-      
-      distance.to.minimum <- segment.elevation.data$distance.km.total[minimum.location]
       
       pumping.df <- data.frame(
         unique(segment.elevation.data$segment.full),
@@ -82,26 +80,22 @@ for(i in seq(length(n.countries))){
         intake.type,
         intake.elevation,
         maximum.elevation,
-        minimum.elevation,
         pumping.lift,
-        power.drop,
         segment.length,
         segment.elevation.data$lon[1],
         segment.elevation.data$lat[1],
         segment.elevation.data$lon[maximum.location],
         segment.elevation.data$lat[maximum.location],
-        distance.to.maximum,
-        distance.to.minimum
+        distance.to.maximum
+        
         )
      
       colnames(pumping.df) <- c('segment.full', 'section.id', 'segment.id',
-                                'intake.type','intake.elevation',
-                                'maximum.elevation', 'minimum.elevation',
-                                'pumping.lift', 'power drop',
-                                'segment.length', 
+                                'intake.type','intake.elevation','maximum.elevation',
+                                'pumping.lift', 'segment.length', 
                                 'intake.lon','intake.lat',
                                 'maximum.height.lon','maximum.height.lat', 
-                                'distance.to.maximum', 'distance.to.minimum')
+                                'distance.to.maximum')
       
       
       list.segments[[k]] <- pumping.df 
@@ -130,4 +124,4 @@ for(i in seq(length(n.countries))){
 
 pumping.dataframe.df <- do.call(rbind, list.countries)
 
-write.csv(pumping.dataframe.df, paste0(outputDir, 'intake_information_infrastructure.csv'), row.names = F)
+write.csv(pumping.dataframe.df, paste0(outputDir, 'intake_information.csv'), row.names = F)

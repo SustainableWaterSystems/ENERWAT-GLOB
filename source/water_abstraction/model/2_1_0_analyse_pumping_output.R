@@ -4,16 +4,17 @@ library(vroom)
 inputDir <- '../../../../output/water_abstraction/model/ibwt/'
 
 inputDirElevation <- paste0(inputDir, '0_elevation_profiles/3_pumping_elevations/')
-inputDirEnergy <- paste0(inputDir, '2_energy/')
+inputDirEnergyMonth <- paste0(inputDir, '2_energy/monthly/')
+inputDirEnergyYear <- paste0(inputDir, '2_energy/yearly/')
 
 
 #### load ####
-intake.data <- read.csv(paste0(inputDirElevation, 'intake_information_infrastructure.csv'))
+intake.data <- read.csv(paste0(inputDirElevation, 'intake_information.csv'))
 
 pumping.lift.data <- intake.data %>% 
   filter(intake.type == 'Pumping station')
 
-n.countries <- list.dirs(inputDirEnergy, recursive = F, full.names = F)
+n.countries <- list.dirs(inputDirEnergyYear, recursive = F, full.names = F)
 # n.countries
 
 
@@ -24,7 +25,7 @@ for(i in seq(length(n.countries))){
   
   country <- n.countries[i]
   
-  inputDirCountry <- paste0(inputDirEnergy, country, '/')
+  inputDirCountry <- paste0(inputDirEnergy, 'yearly/', country, '/')
   
   #get country transfers
   n.transfers <- list.dirs(inputDirCountry, recursive = F, full.names = F)
@@ -102,4 +103,4 @@ pumping.summary <- do.call(rbind, countries.summary.list)
 pumping.ts.all <- do.call(rbind, countries.ts.list)
 
 write.csv(pumping.summary, paste0(inputDirEnergy, 'pumping_summary.csv'), row.names = F)
-vroom_write(pumping.ts.all, paste0(inputDirEnergy, 'pumping_timeseries_all.csv'), delim = ',')
+vroom_write(pumping.ts.all, paste0(inputDirEnergy, 'pumping_timeseries_all_yearly.csv'), delim = ',')
