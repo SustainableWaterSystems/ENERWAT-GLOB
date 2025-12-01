@@ -1,3 +1,5 @@
+rm(list=ls())
+
 #### script to get the type of intake at the first point of the ibwt segment
 
 library(readxl)
@@ -20,9 +22,9 @@ inputDirIBWT <- paste0(inputDir, '0_elevation_profiles/Transfer_segments/')
 
 outputDir <- '../../../../output/water_abstraction/model/ibwt/0_elevation_profiles/'
 
-inputDirElevation <- paste0(outputDir, '0_elevation_natural/')
+inputDirElevation <- paste0(outputDir, '0_elevation/')
 
-outputDirPumping <- paste0(outputDir, '1_ibwt_starting_points/')
+outputDirPumping <- paste0(outputDir, '1_segments/')
 
 
 #### loop by country ####

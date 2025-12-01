@@ -79,8 +79,8 @@ def get_discharge():
 
 inputDir = '../../../../input/water_abstraction/ibwt/1_discharge_timeseries/'
 inputDirDischarge = inputDir + 'discharge_Steyaert2025/'
-outputDir = '../../../../output/water_abstraction/model/ibwt/1_discharge_timeseries/'
-outputDirTS = outputDir + '/timeseries/'
+outputDir = '../../../../output/water_abstraction/model/ibwt/'
+outputDirTS = outputDir + '1_discharge_timeseries/0_timeseries_raw/timeseries/'
 
 if not os.path.exists(outputDirTS):
     os.makedirs(outputDirTS)
@@ -92,7 +92,7 @@ reservoirs_5arcmin = xr.open_dataset(inputDir + 'outlet_map_geodar_lakes_dams_un
 reservoirs_5arcmin = reservoirs_5arcmin.expand_dims(time=1)
 
 #open dataset containing reservoirs ID related to inter-basin transfers
-loc = pd.read_csv(outputDir + 'ibwt_zones.csv', encoding= 'latin')
+loc = pd.read_csv(outputDir + '0_elevation_profiles/3_information/0_0_sections_reservoirs.csv', encoding= 'latin')
 
 #get zones of reservoirs (avoid loading discharge .nc everytime)
 pcr_zones = loc['zone_ID'].unique()
