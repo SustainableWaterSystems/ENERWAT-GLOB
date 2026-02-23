@@ -13,19 +13,20 @@ replaceMessage <- function(x, width = 80)
   message(paste0(x, "                                  "), appendLF = F)
 }
 
-inputDir <- '../../../../output/water_abstraction/model/ibwt/0_elevation_profiles/'
+inputDir <- '../../../../output/water_abstraction/model/ibwt/1_discharge_timeseries/'
+inputDirElevation <- '../../../../output/water_abstraction/model/ibwt/0_elevation_profiles/1_segments/'
 
-inputDirElevation <- paste0(inputDir, '1_segments/')
+outputDir <- paste0(inputDir, '2_infrastructure/')
+dir.create(outputDir, recursive = T, showWarnings = F)
 
-outputDir <- paste0(inputDir, '3_information/')
+#### load 
+data.sections <- read.csv(paste0(inputDir,'0_timeseries_raw/1_0_bias_correction_sections.csv'))
+data.segments <- read.csv(paste0(inputDir,'0_timeseries_raw/1_1_bias_correction_segments.csv'))
 
-
-#### 
-intake.data <- read.csv(paste0(outputDir,'1_information_intakes.csv'))
-
-pumping.intakes <- intake.data %>% 
+pumping.intakes <- data.segments %>% 
   filter(intake.type == 'Pumping station')
 
+#### process ####
 n.countries <- unique(pumping.intakes$Country)
 
 list.countries <- list()
@@ -64,42 +65,26 @@ for(i in seq(length(n.countries))){
                             'Transfer: ', transfer.name.j, ' - ',
                             'Segment: ', k, '/', length(n.segments)))
       
+      #### segment info
+      segment.info <- n.segments.df[k,]
+      
+      #### get elevation lift and bind
       segment.elevation.data <- read.csv(paste0(segments.folder, 'segment_', 
                                                 n.segments[k], '.csv'))
-      
-      reservoir.id.df <- intake.data %>% 
-        filter(transfer.name == transfer.name.j) %>% 
-        filter(segment.full == unique(segment.elevation.data$segment.full))
-      
-      intake.type <- segment.elevation.data$Subject[1]
       
       intake.elevation <- segment.elevation.data$elevation.aster.m[
         which(!is.na(segment.elevation.data$Subject))
       ]
       
-      #### get various statistics of the segment
       maximum.elevation <- max(segment.elevation.data$elevation.aster.m)
 
       pumping.lift <- maximum.elevation - intake.elevation
 
-      segment.length <- unique(segment.elevation.data$segment.length.km)
-
-      pumping.df <- data.frame(
-        unique(segment.elevation.data$segment.full),
-        unique(segment.elevation.data$section.id),
-        unique(segment.elevation.data$segment.id),
-        reservoir.id.df$reservoir.id,
-        intake.type,
-        intake.elevation,
-        maximum.elevation,
-        pumping.lift,
-        segment.length
-        )
-     
-      colnames(pumping.df) <- c('segment.full', 'section.id', 'segment.id', 'reservoir.id',
-                                'intake.type','intake.elevation',
-                                'maximum.elevation',
-                                'pumping.lift', 'segment.length')
+      #### bind
+      pumping.df <- segment.info %>% 
+        mutate(elevation.intake = intake.elevation,
+               elevation.max = maximum.elevation,
+               elevation.lift = pumping.lift)
       
       
       list.segments[[k]] <- pumping.df 
@@ -107,10 +92,6 @@ for(i in seq(length(n.countries))){
     }
     
     segments.pumping.df <- do.call(rbind, list.segments)
-    
-    segments.pumping.df <- segments.pumping.df %>% 
-      mutate(transfer.name = transfer.name.j) %>% 
-      relocate(transfer.name, .before = segment.full)
     
     list.transfers[[j]] <- segments.pumping.df
       
@@ -128,4 +109,4 @@ for(i in seq(length(n.countries))){
 
 pumping.dataframe.df <- do.call(rbind, list.countries)
 
-write.csv(pumping.dataframe.df, paste0(outputDir, '2_1_information_pumping.csv'), row.names = F)
+write.csv(pumping.dataframe.df, paste0(outputDir, '1_information_pumping.csv'), row.names = F)

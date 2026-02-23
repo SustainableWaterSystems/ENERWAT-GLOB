@@ -2,12 +2,9 @@ rm(list=ls())
 
 #### script to get the type of intake at the first point of the ibwt segment
 
-library(readxl)
-library(dplyr)
-library(terra)
 library(sf)
+library(dplyr)
 library(geosphere)
-library(tidyr)
 
 replaceMessage <- function(x, width = 80)
 {

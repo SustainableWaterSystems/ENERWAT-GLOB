@@ -60,15 +60,8 @@ for(i in seq(length(n.countries))){
       segment.elevation.data <- read.csv(paste0(segments.folder, segments.n[k]))
       
       intake.type <- segment.elevation.data$Subject[1]
-      
-      # if(intake.type == 'River intake'){next}
-      
       reservoir.id <- transfer.sections$reservoir_ID[
         which(transfer.sections$Section == unique(segment.elevation.data$section.id))]
-      
-      # if(length(reservoir.id) == 0){next}
-      
-      # print(reservoir.id)
 
       segment.info.df <- data.frame(
         unique(segment.elevation.data$segment.full),
@@ -89,7 +82,6 @@ for(i in seq(length(n.countries))){
          
     }
     
-    # if(length(list.segments) == 0){next}
     
     segments.transfer.df <- do.call(rbind, list.segments)
     

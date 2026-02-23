@@ -3,10 +3,10 @@ rm(list=ls())
 #### script to match the GeoDAR reservoirs 
 #### with a PCR-GLOBWB zone to later extract reservoir discharge
 
-library(readxl)
-library(vroom)
 library(dplyr)
 library(tidyr)
+library(readxl)
+library(vroom)
 
 inputDir <- '../../../../input/water_abstraction/ibwt/'
 
@@ -76,8 +76,6 @@ for(i in seq(length(countries.n))){
   
   #### loop per transfer
   for(j in seq(length(country.transfers))){
-    
-    # j=1
     
     transfer.name <- country.transfers[j]
     

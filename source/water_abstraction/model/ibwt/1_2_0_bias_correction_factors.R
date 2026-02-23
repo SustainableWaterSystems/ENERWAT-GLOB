@@ -1,9 +1,6 @@
 rm(list=ls())
 
 library(dplyr)
-library(tidyr)
-library(lubridate)
-library(vroom)
 
 replaceMessage <- function(x, width = 80)
 {
@@ -22,7 +19,7 @@ section.information <- read.csv(
   paste0(inputDirDischarge, '0_information_sections.csv'))
 
 discharge.data.reported <- read.csv(
-  '../../../../input/global_data/ibwt_mp_volumes_reported.csv') 
+  '../../../../input/global_data/ibwt/ibwt_mp_volumes_reported.csv') 
 
 data.segments <- read.csv(paste0(inputDirElevation, '1_information_intakes.csv'))
 
@@ -59,22 +56,33 @@ bias.corrector.false <- bias.corrector %>%
 #it can happen that the same reservoir is used for different sections
 bias.corrector.unique <- bias.corrector.filter %>% 
   mutate(section.id.unique = seq(nrow(bias.corrector.filter))) %>% 
-  relocate(section.id.unique, .before = Country)
+  relocate(section.id.unique, .before = Country) %>% 
+  rename(cell.lon = lon,
+         cell.lat = lat)
 
 #get reservoirs with bias correction factor
 reservoirs.bias.corrector <- unique(bias.corrector.unique$reservoir.id)
 
 #segments that will be able to be corrected
 data.segments.corrector <- data.segments %>%
-  filter(reservoir.id %in% reservoirs.bias.corrector) %>% 
-  inner_join(bias.corrector.unique)
+  filter(reservoir.id %in% reservoirs.bias.corrector) %>%
+  rename(Section = section.id) %>% 
+  inner_join(bias.corrector.unique) 
+
+data.segments.unique <- data.segments.corrector %>% 
+  mutate(segment.id.unique = seq(nrow(data.segments.corrector))) %>% 
+  relocate(segment.id.unique, .before = Country) %>% 
+  select(segment.id.unique:section.id.unique, hemisphere) %>% 
+  rename(initial.year.transfer = initial.year)
 
 #segments that won't be able to be corrected
 data.segments.missing <- data.segments %>%
-  filter(!reservoir.id %in% reservoirs.bias.corrector)
- 
+  filter(!reservoir.id %in% reservoirs.bias.corrector) 
+
+
+
 #### save ####
 write.csv(bias.corrector.unique,
-          paste0(inputDirDischarge, '1_bias_correction_sections.csv'), row.names = F)
-write.csv(data.segments.corrector,
-          paste0(inputDirDischarge, '2_bias_correction_segments.csv'), row.names = F)
+          paste0(inputDirDischarge, '1_0_bias_correction_sections.csv'), row.names = F)
+write.csv(data.segments.unique,
+          paste0(inputDirDischarge, '1_1_bias_correction_segments.csv'), row.names = F)

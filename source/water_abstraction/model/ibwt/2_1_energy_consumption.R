@@ -2,7 +2,6 @@ rm(list=ls())
 
 library(dplyr)
 library(tidyr)
-# library(lubridate)
 
 replaceMessage <- function(x, width = 80)
 {
@@ -18,32 +17,29 @@ p.efficiency.low <- 0.5 #pump efficiency (low value for uncertainty)
 p.efficiency.high <- 0.9 #pump efficiency (high value for uncertainty)
 
 #### directories ####
-outputDir <- '../../../../output/water_abstraction/model/ibwt/'
+inputDir <- '../../../../output/water_abstraction/model/ibwt/'
 
-inputDirElevation <- paste0(outputDir, '0_elevation_profiles/3_information/')
+inputDirDischarge <- paste0(inputDir, '1_discharge_timeseries/')
 
-inputDirDischarge <- paste0(outputDir, '1_discharge_timeseries/')
-
-outputDirEnergy <- paste0(outputDir, '2_energy/')
+outputDirEnergy <- paste0(inputDir, '2_energy/')
 dir.create(outputDirEnergy, recursive = T, showWarnings = F)
 
 #### load ####
-pumping.lift.info <- read.csv(paste0(inputDirElevation, '2_1_information_pumping.csv'))
-intake.data.df <- read.csv(paste0(inputDirDischarge, '0_timeseries_raw/2_bias_correction_segments.csv'))
-discharge.monthly.df <- read.csv(paste0(inputDirDischarge, '1_bias_corrected/0_0_discharge_bias_corrected_monthly.csv'))
-discharge.yearly.df <- read.csv(paste0(inputDirDischarge, '1_bias_corrected/0_1_discharge_bias_corrected_yearly.csv'))
+pumping.lift.info <- read.csv(
+  paste0(inputDirDischarge, '2_infrastructure/1_information_pumping.csv'))
+
+discharge.monthly.df <- read.csv(
+  paste0(inputDirDischarge, '1_bias_corrected/0_0_discharge_bias_corrected_monthly.csv'))
+discharge.yearly.df <- read.csv(
+  paste0(inputDirDischarge, '1_bias_corrected/0_1_discharge_bias_corrected_yearly.csv'))
 
 #### process ####
-pumping.df <- intake.data.df %>% 
-  filter(intake.type == 'Pumping station') %>% 
-  inner_join(., pumping.lift.info %>% select(transfer.name, segment.full, pumping.lift))
-
 energy.month.list <- list()
 energy.year.list <- list()
 
-for(i in seq(nrow(intake.data.df))){
+for(i in seq(nrow(pumping.lift.info))){
   
-  pumping.select <- pumping.df[i,]
+  pumping.select <- pumping.lift.info[i,]
   
   reservoir.id.select <- pumping.select$section.id.unique
   
@@ -56,16 +52,17 @@ for(i in seq(nrow(intake.data.df))){
   #### monthly ####
   energy.j.low.month <- 
     discharge.select.monthly$discharge.m3.month * 
-    (g * pumping.select$pumping.lift) * (rho * delta.time) / p.efficiency.high
+    (g * pumping.select$elevation.lift) * (rho * delta.time) / p.efficiency.high
   
   energy.j.high.month <- 
     discharge.select.monthly$discharge.m3.month * 
-    (g * pumping.select$pumping.lift) * (rho * delta.time) / p.efficiency.low
+    (g * pumping.select$elevation.lift) * (rho * delta.time) / p.efficiency.low
   
   #tidy dataframe monthly
   energy.month.segment.df <- discharge.select.monthly %>% 
     mutate(segment.id = pumping.select$segment.full) %>% 
     relocate(segment.id, .after = reservoir.id) %>% 
+    mutate(pumping.lift.m = pumping.select$elevation.lift) %>% 
     mutate(energy.j.low = energy.j.low.month,
            energy.j.mean = (energy.j.low.month + energy.j.high.month) / 2,
            energy.j.high = energy.j.high.month) %>% 
@@ -86,16 +83,17 @@ for(i in seq(nrow(intake.data.df))){
   #calculate yearly energy consumption range (high - low efficiency)
   energy.j.low.year <-
     discharge.select.yearly$discharge.m3.y.corrected * 
-    (g * pumping.select$pumping.lift) * (rho * delta.time) / p.efficiency.high
+    (g * pumping.select$elevation.lift) * (rho * delta.time) / p.efficiency.high
   
   energy.j.high.year <-
     discharge.select.yearly$discharge.m3.y.corrected * 
-    (g * pumping.select$pumping.lift) * (rho * delta.time) / p.efficiency.low
+    (g * pumping.select$elevation.lift) * (rho * delta.time) / p.efficiency.low
   
   #tidy dataframe
   energy.year.segment.df <- discharge.select.yearly %>% 
     mutate(segment.id = pumping.select$segment.full) %>% 
     relocate(segment.id, .after = reservoir.id) %>% 
+    mutate(pumping.lift.m = pumping.select$elevation.lift) %>% 
     mutate(energy.j.low = energy.j.low.year,
            energy.j.mean = (energy.j.low.year + energy.j.high.year) / 2,
            energy.j.high = energy.j.high.year) %>% 

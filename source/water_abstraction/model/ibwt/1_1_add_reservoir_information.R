@@ -1,7 +1,6 @@
 rm(list=ls())
 
 library(dplyr)
-library(tidyr)
 library(lubridate)
 
 replaceMessage <- function(x, width = 80)

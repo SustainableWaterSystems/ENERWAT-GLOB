@@ -57,13 +57,10 @@ def get_discharge():
 
 	#get discharge at selected pixel
 	discharge_selected = discharge_nc['discharge'][:, get_latlon.iy, get_latlon.ix]
-	# print(discharge_selected)
 
 	# PCR-GLOBWB was run for 1979-2023 (select dates in pd.date_range)	
 	discharge_df = pd.DataFrame(discharge_selected,columns=['discharge']) #latitude comes before longitude in PCR-GLOBWB netCDF file)
 	discharge_df['datetime'] = pd.date_range(start='1/1/1979', end='12/31/2023', freq='MS') #monthly
-
-	# print(discharge_df)
 
 	#put datetime at beginning
 	datetime = discharge_df['datetime']

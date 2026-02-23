@@ -1,12 +1,9 @@
+#### this script uses terra to extract the elevation of a dem along a vector line
 rm(list=ls())
 
-#### this script uses terra to extract the elevation of a dem along a vector line
 library(readxl)
 library(dplyr)
 library(terra)
-library(sf)
-library(geosphere)
-library(tidyr)
 library(stringr)
 
 replaceMessage <- function(x, width = 80)
@@ -49,7 +46,6 @@ for(i in seq(length(n.countries))){
   #### loop per transfer
   for(j in seq(length(country.transfers))){
     
-    # j=5
     transfer.name <- country.transfers[j]
     
     #create output directory for the transfer
@@ -71,7 +67,6 @@ for(i in seq(length(n.countries))){
     
     for(k in seq(length(segments.n))){
       
-      # k=1
       replaceMessage(paste0('Country: ', country, ' - ',
                             'Transfer: ', transfer.name, ' - ',
                             'Segment: ', k, '/', length(segments.n)))
