@@ -94,7 +94,9 @@ for(i in seq(nrow(pumping.lift.info))){
     group_by(datetime, section.id.unique, country, transfer.name, section.id, reservoir.id, segment.id, hemisphere, pumping.lift.m) %>% 
     summarise_at(vars(energy.kwh.m3.low:energy.kwh.m3.km.high), ~ mean(.x, na.rm = TRUE))
   
-  energy.year.segment.df <- inner_join(energy.year.segment.sums, energy.year.segment.means)
+  energy.year.segment.df <- inner_join(energy.year.segment.sums, 
+                                       energy.year.segment.means,
+                                       multiple = 'all')
   
   # #calculate yearly energy consumption range (high - low efficiency)
   # energy.j.low.year <-

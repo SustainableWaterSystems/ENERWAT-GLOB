@@ -110,17 +110,23 @@ for(i in seq(nrow(reservoirs.ibwt.usa))){
   # nse.high.month <- NSE(ts.validation.df.month$energy.mwh.high, ts.validation.df.month$turner.mwh)
 
 
-  kge.low.month <- KGE(ts.validation.df.month$energy.mwh.low, ts.validation.df.month$turner.mwh)
-  kge.mean.month <- KGE(ts.validation.df.month$energy.mwh.mean, ts.validation.df.month$turner.mwh)
-  kge.high.month <- KGE(ts.validation.df.month$energy.mwh.high, ts.validation.df.month$turner.mwh)
+  kge.low.month <- KGE(ts.validation.df.month$energy.mwh.low, 
+                       ts.validation.df.month$turner.mwh, na.rm = T)
+  kge.mean.month <- KGE(ts.validation.df.month$energy.mwh.mean, 
+                        ts.validation.df.month$turner.mwh, na.rm = T)
+  kge.high.month <- KGE(ts.validation.df.month$energy.mwh.high, 
+                        ts.validation.df.month$turner.mwh, na.rm = T)
 
   # nrmse.low.month <- nrmse(ts.validation.df.month$energy.mwh.low, ts.validation.df.month$turner.mwh)
   # nrmse.mean.month <- nrmse(ts.validation.df.month$energy.mwh.mean, ts.validation.df.month$turner.mwh)
   # nrmse.high.month <- nrmse(ts.validation.df.month$energy.mwh.high, ts.validation.df.month$turner.mwh)
 
-  kge.low.year <- KGE(ts.validation.df.year$energy.mwh.low, ts.validation.df.year$turner.mwh)
-  kge.mean.year <- KGE(ts.validation.df.year$energy.mwh.mean, ts.validation.df.year$turner.mwh)
-  kge.high.year <- KGE(ts.validation.df.year$energy.mwh.high, ts.validation.df.year$turner.mwh)
+  kge.low.year <- KGE(ts.validation.df.year$energy.mwh.low, 
+                      ts.validation.df.year$turner.mwh, na.rm = T)
+  kge.mean.year <- KGE(ts.validation.df.year$energy.mwh.mean, 
+                       ts.validation.df.year$turner.mwh, na.rm = T)
+  kge.high.year <- KGE(ts.validation.df.year$energy.mwh.high, 
+                       ts.validation.df.year$turner.mwh, na.rm = T)
 
 
   # nse.low.year <- NSE(ts.validation.df.year$energy.mwh.low, ts.validation.df.year$turner.mwh)
@@ -157,16 +163,16 @@ kge.usa.df.month <- do.call(rbind, kge.list.month)
 kge.usa.df.year <- do.call(rbind, kge.list.year)
 
 
-kge.usa.df.month.sto <- kge.usa.df.month %>%
-  filter(reservoir.select.plant.type == 'STO')
+# kge.usa.df.month.sto <- kge.usa.df.month %>%
+#   filter(reservoir.select.plant.type == 'STO')
+# 
+# kge.usa.df.year.sto <- kge.usa.df.year %>%
+#   filter(reservoir.select.plant.type == 'STO')
 
-kge.usa.df.year.sto <- kge.usa.df.year %>%
-  filter(reservoir.select.plant.type == 'STO')
-
-summary(kge.usa.df.month.sto$kge.low.month)
-summary(kge.usa.df.month.sto$kge.mean.month)
-summary(kge.usa.df.month.sto$kge.high.month)
-
-summary(kge.usa.df.year.sto$kge.low.year)
-summary(kge.usa.df.year.sto$kge.mean.year)
-summary(kge.usa.df.year.sto$kge.high.year)
+# summary(kge.usa.df.month.sto$kge.low.month)
+# summary(kge.usa.df.month.sto$kge.mean.month)
+# summary(kge.usa.df.month.sto$kge.high.month)
+# 
+# summary(kge.usa.df.year.sto$kge.low.year)
+# summary(kge.usa.df.year.sto$kge.mean.year)
+# summary(kge.usa.df.year.sto$kge.high.year)

@@ -103,11 +103,10 @@ ibwt.shah.df <- do.call(rbind, list.country.matches)
 ####  if head does is not reported use dam height ####
 #### if both head and dam height dont exist -> remove hydropower plant ?
 ibwt.shah.df.heads <- ibwt.shah.df %>%
-  filter(!is.na(dam.height.m) | !is.na(head.m)) %>%
-  mutate(head.available = 1)
+  filter(!is.na(dam.height.m) | !is.na(head.m)) 
 
 ibwt.shah.df.heads$head.m[is.na(ibwt.shah.df.heads$head.m)] <- 
   ibwt.shah.df.heads$dam.height[is.na(ibwt.shah.df.heads$head.m)]
 
 
-write.csv(heads.shah, paste0(outputDir, '0_information_hydropower.csv'), row.names = F)
+write.csv(ibwt.shah.df.heads, paste0(outputDir, '0_information_hydropower.csv'), row.names = F)

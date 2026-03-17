@@ -32,7 +32,7 @@ p.p <- ggplot(energy.countries.ts
   geom_ribbon(aes(x=datetime, 
                   ymin=twh.low.p, 
                   ymax=twh.high.p, 
-                  color=Country), alpha=0.05, linetype ='dashed') +
+                  color=Country), alpha=0.05, linetype ='dashed', show.legend = F) +
   ggtitle('A. National energy production (%)') +
   scale_color_manual(values = my.palette) +
   xlab('Year')+
@@ -47,7 +47,8 @@ p.p <- ggplot(energy.countries.ts
         plot.title = element_text(hjust=0.5, size=18),
         axis.title.y = element_markdown(),
         axis.title.x = element_blank(),
-        axis.text.x = element_blank()) 
+        axis.text.x = element_blank()) +
+  guides(color=guide_legend(nrow=2, override.aes = list(size = 3, shape = 22, linewidth = 5))) 
 
 p.c <- ggplot(energy.countries.ts 
               # %>% filter(twh.mean.c!=0)
@@ -56,7 +57,7 @@ p.c <- ggplot(energy.countries.ts
   geom_ribbon(aes(x=datetime, 
                   ymin=twh.low.c, 
                   ymax=twh.high.c, 
-                  color=Country), alpha=0.05, linetype ='dashed') +
+                  color=Country), alpha=0.05, linetype ='dashed', show.legend = F) +
   ggtitle('B. National energy consumption (%)') +
   scale_color_manual(values = my.palette) +
   xlab('Year')+
@@ -70,7 +71,8 @@ p.c <- ggplot(energy.countries.ts
         plot.title = element_text(hjust=0.5, size=18),
         axis.title.y = element_markdown(),
         axis.title.x = element_blank(),
-        axis.text.x = element_blank()) 
+        axis.text.x = element_blank()) +
+  guides(color=guide_legend(nrow=2, override.aes = list(size = 3, shape = 22, linewidth = 5))) 
 
 
 #### production ratio
@@ -82,7 +84,7 @@ p.ratio.p <- ggplot(energy.countries.ts
   geom_ribbon(aes(x=datetime, 
                   ymin=ratio.electricity.low.p, 
                   ymax=ratio.electricity.high.p, 
-                  color=Country), alpha=0.05, linetype ='dashed')  +
+                  color=Country), alpha=0.05, linetype ='dashed', show.legend = F)  +
   ggtitle('\nC. National energetic contribution (%)') +
   scale_color_manual(values = my.palette) +
   xlab('Year')+
@@ -94,7 +96,8 @@ p.ratio.p <- ggplot(energy.countries.ts
         legend.position = 'bottom',
         legend.title.position = 'top',
         legend.title = element_text(hjust=0.5),
-        plot.title = element_text(hjust=0.5, size=18)) 
+        plot.title = element_text(hjust=0.5, size=18)) +
+  guides(color=guide_legend(nrow=2, override.aes = list(size = 3, shape = 22, linewidth = 5))) 
 
 #### consumption ratio
 #electricity
@@ -105,7 +108,7 @@ p.ratio.c <- ggplot(energy.countries.ts
   geom_ribbon(aes(x=datetime, 
                   ymin=ratio.electricity.low.c, 
                   ymax=ratio.electricity.high.c, 
-                  color=Country), alpha=0.05, linetype ='dashed') +
+                  color=Country), alpha=0.05, linetype ='dashed', show.legend = F) +
   ggtitle('\nD. National energetic toll (%)') +
   scale_color_manual(values = my.palette) +
   xlab('Year')+
@@ -117,7 +120,8 @@ p.ratio.c <- ggplot(energy.countries.ts
         legend.position = 'bottom',
         legend.title.position = 'top',
         legend.title = element_text(hjust=0.5),
-        plot.title = element_text(hjust=0.5, size=18)) 
+        plot.title = element_text(hjust=0.5, size=18)) +
+  guides(color=guide_legend(nrow=2, override.aes = list(size = 3, shape = 22, linewidth = 5))) 
 
 
 #### patchwork ####

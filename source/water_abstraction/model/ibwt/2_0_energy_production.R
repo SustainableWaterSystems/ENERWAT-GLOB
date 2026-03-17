@@ -137,7 +137,9 @@ for(i in seq(nrow(hydropower.head.info))){
     group_by(datetime, section.id.unique, country, transfer.name, section.id, reservoir.id, segment.id, hemisphere, head.m) %>% 
     summarise_at(vars(energy.m3.kwh.low:energy.m3.kwh.km.high), ~ mean(.x, na.rm = TRUE))
   
-  energy.year.segment.df <- inner_join(energy.year.segment.sums, energy.year.segment.means)
+  energy.year.segment.df <- inner_join(energy.year.segment.sums, 
+                                       energy.year.segment.means,
+                                       multiple = 'all')
     
   
   

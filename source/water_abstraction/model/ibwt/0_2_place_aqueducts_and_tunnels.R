@@ -28,8 +28,8 @@ dir.create(outputDir, recursive = T, showWarnings = F)
 
 
 #### processing ####
-
 n.countries <- list.dirs(inputDirElevation, full.names = F, recursive = F)
+
 
 for(i in seq(length(n.countries))){
   
