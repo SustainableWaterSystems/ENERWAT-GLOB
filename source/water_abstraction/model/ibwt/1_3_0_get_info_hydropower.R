@@ -1,8 +1,8 @@
 rm(list=ls())
 
 library(dplyr)
-library(RANN)
 library(geosphere)
+library(data.table)
 
 replaceMessage <- function(x, width = 80)
 {
@@ -26,147 +26,88 @@ data.segments <- read.csv(paste0(inputDir,'0_timeseries_raw/1_1_bias_correction_
 power.intakes <- data.segments %>% 
   filter(intake.type == 'Power station')
 
-# write.csv(power.intakes, paste0(outputDir, '1_information_hydropower.csv'), row.names = F)
-
 
 #### process ####
-#get coordinates from Jignesh data
-shah2025.coordinates <- shah2025 %>%
-  select(plant_lon, plant_lat) %>%
-  filter(!is.na(plant_lon))
+### change USA naming in Shah
+shah2025$country[which(shah2025$country == 'United States of America')] <- 'USA'
 
-nearest.list <- list()
+#get ibwt countries
+countries.ibwt <- unique(power.intakes$Country)
 
-for(i in seq(nrow(power.intakes))){
+list.country.matches <- list()
+for(i in seq(length(countries.ibwt))){
+  
+  #select country
+  country.sel <- countries.ibwt[i]
+  
+  #filter ibwt and shah datasets for that country
+  country.ibwt <- power.intakes %>% 
+    filter(Country == country.sel)
+  
+  country.shah <- shah2025 %>% 
+    filter(country == country.sel)
+    
+  ### get coordinates of both datasets
+  coordinates.ibwt <- country.ibwt %>% 
+    select(intake.lon, intake.lat)
+  
+  coordinates.shah <- country.shah %>% 
+    select(plant_lon, plant_lat)
 
-  #selecy hydropower to match from ibwts
-  hydropower.select <- power.intakes[i,]
-
-  #get coordinates of selected hydropower
-  point.coordinates <- data.frame(hydropower.select$intake.lon,
-                                  hydropower.select$intake.lat)
-  colnames(point.coordinates) <- colnames(shah2025.coordinates)
-
-  #make dataframe
-  matching.df <- rbind(point.coordinates, shah2025.coordinates)
-
-  #find closest point
-  rann.matches <- data.frame(nn2(matching.df, k=10)[[1]])
-
-  match.id <- rann.matches$X2[1]
-
-  shah.matched <- shah2025[match.id,] %>%
-    select(ID:plant_type, year, dam_height_m, head_m)
-
-  #### calculate distance between matched points
-  # model.distance <- distm(c(lon1, lat1), c(lon2, lat2), fun = distHaversine)
-  model.distance <- distm(c(shah.matched$plant_lon, shah.matched$plant_lat),
-                          c(point.coordinates$plant_lon, point.coordinates$plant_lat),
-                          fun = distHaversine)
-
-  hydropower.select.head <- hydropower.select %>%
-    mutate(id.shah2025 = shah.matched$ID,
-           plant.type = shah.matched$plant_type,
-           capacity.mw = shah.matched$capacity_mw,
-           dam.height = shah.matched$dam_height_m,
-           head.m = shah.matched$head_m,
-
-           # match.distance = model.distance,
-           country.shah = shah.matched$country)
-
-  nearest.list[[i]] <- hydropower.select.head
-
+  #### calculate distances haversine
+  country.distances <- distm(coordinates.ibwt, coordinates.shah, fun = distHaversine)
+  
+  # get minimum distance
+  distances.min <- apply(country.distances, 1, FUN = min)
+  
+  list.matches <- list()
+  #get match per power plant
+  for(j in seq(nrow(country.ibwt))){
+    
+    #get distances for single power plant
+    distance.vector <- data.frame(matrix(country.distances[j,]))
+    colnames(distance.vector) <- 'distance.m'
+    
+    #get index of match in shah dataset
+    country.idx <- which(distance.vector$distance.m == distances.min[j])
+    
+    #get plant data from shah 
+    shah.match <- country.shah[country.idx,] %>%
+      select(ID, name, capacity_mw, plant_type, 
+             dam_height_m, head_m,
+             plant_lat, plant_lon) %>% 
+      mutate(distance.match = distances.min[j])
+    
+    colnames(shah.match) <- c('id.shah2025','plant.name','capacity.mw',
+                              'plant.type', 'dam.height.m','head.m',
+                              'lat.shah2025','lon.shah2025', 'match.distance.m'
+                              )
+    
+    list.matches[[j]] <- shah.match
+    
+    
+  }
+  
+  #unlist shah matches 
+  shah.matches.country <- do.call(rbind, list.matches) 
+  
+  #add information to original dataframe
+  country.ibwt.match <- cbind(country.ibwt, shah.matches.country)
+  
+  list.country.matches[[i]] <- country.ibwt.match
+  
 }
 
-hydropower.heads <- do.call(rbind, nearest.list)
+ibwt.shah.df <- do.call(rbind, list.country.matches)
 
 ####  if head does is not reported use dam height ####
-heads.shah <- hydropower.heads %>%
-  filter(!is.na(dam.height) | !is.na(head.m)) %>%
+#### if both head and dam height dont exist -> remove hydropower plant ?
+ibwt.shah.df.heads <- ibwt.shah.df %>%
+  filter(!is.na(dam.height.m) | !is.na(head.m)) %>%
   mutate(head.available = 1)
 
-heads.shah$head.m[is.na(heads.shah$head.m)] <- heads.shah$dam.height[is.na(heads.shah$head.m)]
+ibwt.shah.df.heads$head.m[is.na(ibwt.shah.df.heads$head.m)] <- 
+  ibwt.shah.df.heads$dam.height[is.na(ibwt.shah.df.heads$head.m)]
 
-#### if bot head and dam height dont exist -> use elevation profile ####
-heads.nas <- hydropower.heads %>%
-  filter(is.na(dam.height) & is.na(head.m))  %>%
-  mutate(head.available = 0)
 
-n.countries <- unique(heads.nas$Country)
-
-list.countries <- list()
-
-for(i in seq(length(n.countries))){
-
-  country <- n.countries[i]
-
-  n.transfers.df <- heads.nas %>%
-    filter(Country == country)
-
-  n.transfers <- unique(n.transfers.df$transfer.name)
-
-  list.transfers <- list()
-
-  #### loop per transfer
-  for(j in seq(length(n.transfers))){
-
-    transfer.name.j <- n.transfers[j]
-
-    #### get elevation data of all transfer segments ####
-    segments.folder <- paste0(inputDirElevation, country, '/',
-                              transfer.name.j, '/')
-
-    n.segments.df <- n.transfers.df %>%
-      filter(transfer.name == transfer.name.j)
-
-    n.segments <- n.segments.df$segment.full
-
-    list.segments <- list()
-
-    for(k in seq(length(n.segments))){
-
-      replaceMessage(paste0('Country: ', country, ' - ',
-                            'Transfer: ', transfer.name.j, ' - ',
-                            'Segment: ', k, '/', length(n.segments)))
-
-      #### segment info
-      segment.info <- n.segments.df[k,]
-
-      #### get elevation lift and bind
-      segment.elevation.data <- read.csv(paste0(segments.folder, 'segment_',
-                                                n.segments[k], '.csv'))
-
-      intake.elevation <- segment.elevation.data$elevation.aster.m[
-        which(!is.na(segment.elevation.data$Subject))
-      ]
-
-      # elevation.max <- max(segment.elevation.data$elevation.aster.m)
-      elevation.min <- min(segment.elevation.data$elevation.aster.m)
-
-      hydropower.head <- intake.elevation - elevation.min
-
-      list.segments[[k]] <- hydropower.head
-
-    }
-
-    segments.pumping.df <- do.call(rbind, list.segments)
-
-    list.transfers[[j]] <- segments.pumping.df
-
-  }
-
-  country.transfers.df <- do.call(rbind, list.transfers)
-
-  list.countries[[i]] <- country.transfers.df
-
-}
-
-heads.elevation.values <- data.frame(do.call(rbind, list.countries))
-colnames(heads.elevation.values) <- 'head.m'
-
-#### add heads from elevation to heads dataframe
-heads.nas$head.m <- heads.elevation.values$head.m
-
-#### bind dataframes
-hydropower.heads.complete <- rbind(heads.shah, heads.nas)
-write.csv(hydropower.heads.complete, paste0(outputDir, '0_information_hydropower.csv'), row.names = F)
+write.csv(heads.shah, paste0(outputDir, '0_information_hydropower.csv'), row.names = F)

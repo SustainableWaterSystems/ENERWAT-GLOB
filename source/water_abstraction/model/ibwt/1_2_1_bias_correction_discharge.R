@@ -99,37 +99,59 @@ write.csv(discharge.monthly.cut, paste0(outputDirData, '0_0_discharge_bias_corre
 write.csv(discharge.yearly.cut, paste0(outputDirData, '0_1_discharge_bias_corrected_yearly.csv'), row.names = F)
 
 
+#### check that yearly discharge matches from monthly to yearly
+
+discharge.monthly.check <- discharge.monthly.cut %>% 
+  mutate(datetime = floor_date(datetime, 'year')) %>% 
+  group_by(transfer.name) %>%
+  summarise(km3.y.upscale = sum(discharge.km3.month)) 
+
+discharge.yearly.check <- discharge.yearly.cut %>% 
+  group_by(transfer.name) %>% 
+  summarise(discharge.km3.y.corrected = sum(discharge.km3.y.corrected))
+  
+check.df <- inner_join(discharge.monthly.check,
+                       discharge.yearly.check)
+
+
+# check.df <- inner_join(discharge.yearly.cut %>% 
+#                          select(datetime, transfer.name, discharge.km3.y.corrected) %>% 
+#                          group_by(transfer.name) %>% 
+#                          summarise(discharge.km3.y.corrected = sum(discharge.km3.y.corrected)),
+#                        discharge.monthly.upscale)
+
+
 #### validation ####
 
 section.information <- correction.factors
 
 discharge.yearly.corrected <- discharge.yearly.cut
 
-discharge.corrected.summarise <- discharge.yearly.corrected %>% 
-  group_by(section.id.unique) %>% 
+discharge.corrected.summarise <- discharge.yearly.corrected %>%
+  group_by(section.id.unique) %>%
   summarise(discharge.km3.y.mean.corrected = mean(discharge.km3.y.corrected))
 
-validation.df <- inner_join(section.information, discharge.corrected.summarise) 
+validation.df <- inner_join(section.information, discharge.corrected.summarise)
 
 #### check number of reservoirs per transfer
-reservoirs.n <- validation.df %>% 
-  group_by(transfer.name) %>% 
+reservoirs.n <- validation.df %>%
+  group_by(transfer.name) %>%
   summarise(reservoirs.count=n())
 
 #### validation dataframe
 
-validation.df.alt <- validation.df %>% 
-  group_by(transfer.name) %>% 
+validation.df.alt <- validation.df %>%
+  group_by(transfer.name) %>%
   summarise(discharge.km3.y.mean = mean(discharge.km3.y.mean),
             discharge.km3.y.mean.corrected = sum(discharge.km3.y.mean.corrected),
             volumes.km3.y = mean(volumes.km3.y)
-  ) 
+  )
 
 validation.df.res <- inner_join(validation.df.alt, reservoirs.n)
 
-validation.df.singel <- validation.df.res %>% 
+validation.df.singel <- validation.df.res %>%
   filter(reservoirs.count == 1)
-validation.df.multiple <- validation.df.res %>% 
+validation.df.multiple <- validation.df.res %>%
   filter(reservoirs.count != 1)
 
 #### check correlations

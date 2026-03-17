@@ -37,7 +37,8 @@ energy.production.summarise.month <- energy.production.monthly %>%
 
 energy.consumption.summarise.year <- energy.consumption.yearly %>% 
   group_by(datetime, transfer.name, country) %>% 
-  summarise(discharge.km3.y.c = mean(discharge.km3.y.corrected),
+  # summarise(discharge.km3.y.c = mean(discharge.km3.y.corrected),
+  summarise(
             twh.low.c = sum(energy.twh.low),
             twh.mean.c = sum(energy.twh.mean),
             twh.high.c = sum(energy.twh.high)
@@ -45,7 +46,8 @@ energy.consumption.summarise.year <- energy.consumption.yearly %>%
 
 energy.production.summarise.year <- energy.production.yearly %>% 
   group_by(datetime, transfer.name, country) %>% 
-  summarise(discharge.km3.y.p = mean(discharge.km3.y.corrected),
+  # summarise(discharge.km3.y.p = mean(discharge.km3.y.corrected),
+  summarise(
             twh.low.p = sum(energy.twh.low),
             twh.mean.p = sum(energy.twh.mean),
             twh.high.p = sum(energy.twh.high)
@@ -78,18 +80,6 @@ energy.budget.year <- inner_join(energy.consumption.summarise.year, energy.produ
 transfers.both <- unique(energy.budget.year$transfer.name)
 
 #### only production
-transfers.production.year <- energy.production.summarise.year %>%
-  filter(!transfer.name %in% transfers.both) %>%
-  mutate(twh.low.net = twh.low.p,
-         twh.mean.net = twh.mean.p,
-         twh.high.net = twh.high.p,
-  ) %>%
-  mutate(ratio.low = twh.low.net / twh.low.net * 100,
-         ratio.mean = twh.mean.net / twh.mean.net * 100,
-         ratio.high = twh.high.net / twh.high.net * 100
-  ) %>%
-  mutate(transfer.type = 'Energy producer')
-
 transfers.production.month <- energy.production.summarise.month %>%
   filter(!transfer.name %in% transfers.both) %>%
   mutate(twh.low.net = twh.low.p,
@@ -101,7 +91,17 @@ transfers.production.month <- energy.production.summarise.month %>%
          ratio.high = twh.high.net / twh.high.net * 100
   ) %>%
   mutate(transfer.type = 'Energy producer')
-
+transfers.production.year <- energy.production.summarise.year %>%
+  filter(!transfer.name %in% transfers.both) %>%
+  mutate(twh.low.net = twh.low.p,
+         twh.mean.net = twh.mean.p,
+         twh.high.net = twh.high.p,
+  ) %>%
+  mutate(ratio.low = twh.low.net / twh.low.net * 100,
+         ratio.mean = twh.mean.net / twh.mean.net * 100,
+         ratio.high = twh.high.net / twh.high.net * 100
+  ) %>%
+  mutate(transfer.type = 'Energy producer')
 
 #### only consumption
 transfers.consumption.year <- energy.consumption.summarise.year  %>%

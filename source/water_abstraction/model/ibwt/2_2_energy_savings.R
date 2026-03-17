@@ -82,37 +82,53 @@ for(i in seq(nrow(pumping.lift.info))){
            energy.kwh.m3.km.high = energy.kwh.m3.high/ max(pumping.select$segment.length)) 
   
   #### yearly ####
-  #calculate yearly energy consumption range (high - low efficiency)
-  energy.j.low.year <-
-    discharge.select.yearly$discharge.m3.y.corrected * 
-    (g * pumping.select$net.bypass) * (rho * delta.time) / p.efficiency.high
+  #### calculate yearly consumption as upscale from monthly
+  energy.year.segment.sums <- energy.month.segment.df %>% 
+    mutate(datetime=as.Date(datetime)) %>% 
+    mutate(datetime=floor_date(datetime,'year')) %>% 
+    group_by(datetime, section.id.unique, country, transfer.name, section.id, reservoir.id, segment.id, hemisphere, bypass.type) %>% 
+    summarise_at(vars(energy.j.low:energy.twh.high), ~ sum(.x, na.rm = TRUE))
   
-  energy.j.high.year <-
-    discharge.select.yearly$discharge.m3.y.corrected * 
-    (g * pumping.select$net.bypass) * (rho * delta.time) / p.efficiency.low
+  energy.year.segment.means <- energy.month.segment.df %>% 
+    mutate(datetime=as.Date(datetime)) %>% 
+    mutate(datetime=floor_date(datetime,'year')) %>% 
+    group_by(datetime, section.id.unique, country, transfer.name, section.id, reservoir.id, segment.id, hemisphere, bypass.type) %>% 
+    summarise_at(vars(energy.kwh.m3.low:energy.kwh.m3.km.high), ~ mean(.x, na.rm = TRUE))
   
-  #tidy dataframe
-  energy.year.segment.df <- discharge.select.yearly %>% 
-    mutate(segment.id = pumping.select$segment.name) %>% 
-    relocate(segment.id, .after = reservoir.id) %>% 
-    mutate(bypass.type = bypass.type.select) %>% 
-    mutate(pumping.lift.m = pumping.select$pumping.lift) %>% 
-    mutate(energy.j.low = energy.j.low.year,
-           energy.j.mean = (energy.j.low.year + energy.j.high.year) / 2,
-           energy.j.high = energy.j.high.year) %>% 
-    mutate(energy.kwh.low = energy.j.low / (3.6 * 10^6),
-           energy.kwh.mean = energy.j.mean / (3.6 * 10^6),
-           energy.kwh.high = energy.j.high / (3.6 * 10^6)) %>%
-    mutate(energy.twh.low = energy.kwh.low / 10^9,
-           energy.twh.mean = energy.kwh.mean / 10^9,
-           energy.twh.high = energy.kwh.high / 10^9) %>%
-    mutate(energy.kwh.m3.low = energy.kwh.low / discharge.m3.y.corrected,
-           energy.kwh.m3.mean = energy.kwh.mean / discharge.m3.y.corrected,
-           energy.kwh.m3.high = energy.kwh.high / discharge.m3.y.corrected) %>%
-    mutate(energy.kwh.m3.km.low = energy.kwh.m3.low / max(pumping.select$segment.length),
-           energy.kwh.m3.km.mean = energy.kwh.m3.mean / max(pumping.select$segment.length),
-           energy.kwh.m3.km.high = energy.kwh.m3.high/ max(pumping.select$segment.length)) 
+  energy.year.segment.df <- inner_join(energy.year.segment.sums, energy.year.segment.means)
   
+  
+  # #calculate yearly energy consumption range (high - low efficiency)
+  # energy.j.low.year <-
+  #   discharge.select.yearly$discharge.m3.y.corrected * 
+  #   (g * pumping.select$net.bypass) * (rho * delta.time) / p.efficiency.high
+  # 
+  # energy.j.high.year <-
+  #   discharge.select.yearly$discharge.m3.y.corrected * 
+  #   (g * pumping.select$net.bypass) * (rho * delta.time) / p.efficiency.low
+  # 
+  # #tidy dataframe
+  # energy.year.segment.df <- discharge.select.yearly %>% 
+  #   mutate(segment.id = pumping.select$segment.name) %>% 
+  #   relocate(segment.id, .after = reservoir.id) %>% 
+  #   mutate(bypass.type = bypass.type.select) %>% 
+  #   mutate(pumping.lift.m = pumping.select$pumping.lift) %>% 
+  #   mutate(energy.j.low = energy.j.low.year,
+  #          energy.j.mean = (energy.j.low.year + energy.j.high.year) / 2,
+  #          energy.j.high = energy.j.high.year) %>% 
+  #   mutate(energy.kwh.low = energy.j.low / (3.6 * 10^6),
+  #          energy.kwh.mean = energy.j.mean / (3.6 * 10^6),
+  #          energy.kwh.high = energy.j.high / (3.6 * 10^6)) %>%
+  #   mutate(energy.twh.low = energy.kwh.low / 10^9,
+  #          energy.twh.mean = energy.kwh.mean / 10^9,
+  #          energy.twh.high = energy.kwh.high / 10^9) %>%
+  #   mutate(energy.kwh.m3.low = energy.kwh.low / discharge.m3.y.corrected,
+  #          energy.kwh.m3.mean = energy.kwh.mean / discharge.m3.y.corrected,
+  #          energy.kwh.m3.high = energy.kwh.high / discharge.m3.y.corrected) %>%
+  #   mutate(energy.kwh.m3.km.low = energy.kwh.m3.low / max(pumping.select$segment.length),
+  #          energy.kwh.m3.km.mean = energy.kwh.m3.mean / max(pumping.select$segment.length),
+  #          energy.kwh.m3.km.high = energy.kwh.m3.high/ max(pumping.select$segment.length)) 
+  # 
   energy.month.list[[i]] <- energy.month.segment.df
   energy.year.list[[i]] <- energy.year.segment.df
   
