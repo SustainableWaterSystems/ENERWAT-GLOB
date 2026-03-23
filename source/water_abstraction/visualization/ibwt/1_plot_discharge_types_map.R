@@ -22,16 +22,16 @@ wg <- map_data("world")
 
 
 #### load ####
-sections.coord <- read.csv(paste0(inputDirDischarge, '0_timeseries_raw/0_information_sections.csv'))
+sections.coord <- read.csv(paste0(inputDirDischarge, '1_bias_corrected/0_information_sections.csv'))
 
 section.info.df <- read.csv(
-  paste0(inputDirDischarge, '0_timeseries_raw/1_0_bias_correction_sections.csv'))
+  paste0(inputDirDischarge, '1_bias_corrected/1_0_bias_correction_sections.csv'))
 sections.reservoirs <- read.csv(
   paste0(inputDirElevation, '0_0_sections_reservoirs.csv'))
 
 discharge.monthly.df <- read.csv(
   paste0(inputDirDischarge, 
-         '1_bias_corrected/0_0_discharge_bias_corrected_monthly.csv')) %>% 
+         '1_bias_corrected/2_0_discharge_bias_corrected_monthly.csv')) %>% 
   mutate(datetime = as.Date(datetime)) %>% 
   mutate(
     year.continuous = (year(datetime)),
@@ -40,7 +40,7 @@ discharge.monthly.df <- read.csv(
 
 discharge.yearly.df <- read.csv(
   paste0(inputDirDischarge, 
-         '1_bias_corrected/0_1_discharge_bias_corrected_yearly.csv')) %>% 
+         '1_bias_corrected/2_1_discharge_bias_corrected_yearly.csv')) %>% 
   mutate(datetime = as.Date(datetime))
 
 discharge.types <- read.csv(
@@ -59,3 +59,14 @@ ggsave(paste0(outputDirViz,'ibwt_discharge_ts_map.png'), discharge.ts.map,
        height=11, width=8, units='in', dpi=300, bg='white')
 file.show(paste0(outputDirViz,'ibwt_discharge_ts_map.png'))
 
+####
+summary(p.data.map$discharge.mean)
+nrow(p.data.map %>% 
+       filter(discharge.mean > 10))
+
+nrow(p.data.map %>% 
+       filter(discharge.mean < 2))
+
+p.data.map %>% 
+  group_by(trend.sign) %>% 
+  summarise(count=n())

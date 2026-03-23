@@ -20,8 +20,8 @@ outputDir <- paste0(inputDir, '2_infrastructure/')
 dir.create(outputDir, recursive = T, showWarnings = F)
 
 #### load 
-data.sections <- read.csv(paste0(inputDir,'0_timeseries_raw/1_0_bias_correction_sections.csv'))
-data.segments <- read.csv(paste0(inputDir,'0_timeseries_raw/1_1_bias_correction_segments.csv'))
+data.sections <- read.csv(paste0(inputDir,'1_bias_corrected/1_0_bias_correction_sections.csv'))
+data.segments <- read.csv(paste0(inputDir,'1_bias_corrected/1_1_bias_correction_segments.csv'))
 
 pumping.intakes <- data.segments %>% 
   filter(intake.type == 'Pumping station')

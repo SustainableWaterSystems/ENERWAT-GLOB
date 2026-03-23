@@ -29,4 +29,26 @@ p.discharge.y.types <- ggplot() +
         legend.title = element_blank(),
         legend.text = element_markdown(size=13)
   )+
-  guides(color=guide_legend(nrow=2, override.aes = list(size = 3, shape = 22, linewidth = 5)))
+  guides(color=guide_legend(nrow=2, override.aes = list(shape = 22, linewidth = 5)))
+
+#### calculate discharge trend
+discharge.idx <- p.data.ts %>% 
+  filter(type == 'km3.total') %>% 
+  mutate(idx = seq(42))
+
+discharge.year.lm <- lm(km3~idx, data=discharge.idx)
+
+lm.tidy <- broom::tidy(discharge.year.lm)
+summary(discharge.year.lm)
+
+discharge.first <- p.data.ts %>% 
+  filter(type == 'km3.total') %>% 
+  filter(year(datetime) <= 1989)
+
+discharge.last <- p.data.ts %>% 
+  filter(type == 'km3.total') %>% 
+  filter(year(datetime) >= 2012)
+
+discharge.summary <- p.data.ts %>% 
+  group_by(type) %>% 
+  summarise(km3 = mean(km3))

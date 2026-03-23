@@ -186,12 +186,12 @@ p.intensity.p <- ggplot(intensity.plot.df.p %>%
   ggtitle('C. Energy production intensity') +
   xlab('Country') +
   ylab('m<sup>3</sup> kWh<sup>-1</sup><br />') +
-  scale_fill_manual(values=my.palette3,
+  scale_fill_manual(values=my.palette.int.p,
                     labels = c('m<sup>3</sup> kWh<sup>-1</sup>',
                                'm<sup>3</sup> kWh<sup>-1</sup> km<sup>-1</sup>')) +
   scale_y_continuous(
     sec.axis = sec_axis(~./scaling.factor.plot.p, name = 'm<sup>3</sup> kWh<sup>-1</sup> km<sup>-1</sup><br />'),
-    limits=c(0,4)) +
+    limits=c(0,20)) +
   theme_bw() +
   theme(axis.title.y = element_markdown(size=14),
         plot.title = element_text(hjust = 0.5, size=16),
@@ -213,12 +213,12 @@ p.intensity.c <- ggplot(intensity.plot.df.c %>%
   ggtitle('D. Energy consumption intensity') +
   xlab('Country') +
   ylab('kWh m<sup>-3</sup> <br />') +
-  scale_fill_manual(values=my.palette3,
+  scale_fill_manual(values=my.palette.int.c,
                     labels = c('kWh m<sup>-3</sup>',
                                'kWh m<sup>-3</sup> km<sup>-1</sup>')) +
   scale_y_continuous(
     sec.axis = sec_axis(~./scaling.factor.plot.c, name = 'kWh m<sup>-3</sup> km<sup>-1</sup><br />'),
-    limits=c(0,4)) +
+    limits=c(0,3)) +
   theme_bw() +
   theme(axis.title.y = element_markdown(size=14),
         plot.title = element_text(hjust = 0.5,size=16),

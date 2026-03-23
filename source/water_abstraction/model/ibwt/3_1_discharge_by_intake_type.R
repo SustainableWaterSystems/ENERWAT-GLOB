@@ -21,7 +21,7 @@ info.discharge.only <- read.csv(
 
 #### timeseries
 discharge.yearly.df <- read.csv(
-  paste0(inputDirDischarge, '1_bias_corrected/0_1_discharge_bias_corrected_yearly.csv'))
+  paste0(inputDirDischarge, '1_bias_corrected/2_1_discharge_bias_corrected_yearly.csv'))
 
 energy.production.yearly <- read.csv(paste0(inputDir, '2_energy/0_energy_production_yearly.csv'))
 energy.consumption.yearly <- read.csv(paste0(inputDir, '2_energy/1_energy_consumption_yearly.csv'))

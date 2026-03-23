@@ -8,7 +8,7 @@ inputDirDischarge <- paste0(inputDir, '1_discharge_timeseries/')
 inputDirEnergy <- paste0(inputDir, '2_energy/')
 
 #### load ####
-discharge.yearly <- read.csv(paste0(inputDirDischarge, '1_bias_corrected/0_1_discharge_bias_corrected_yearly.csv'))
+discharge.yearly <- read.csv(paste0(inputDirDischarge, '1_bias_corrected/2_1_discharge_bias_corrected_yearly.csv'))
 
 energy.production.yearly <- read.csv(paste0(inputDirEnergy, '0_energy_production_yearly.csv'))
 energy.consumption.yearly <- read.csv(paste0(inputDirEnergy, '1_energy_consumption_yearly.csv'))
@@ -24,6 +24,19 @@ bypass.infrastructure <- read.csv(paste0(inputDirDischarge,
 
 
 ##### abstract 
+discharge.summary <- discharge.yearly %>% 
+  group_by(datetime) %>% 
+  summarise(discharge.km3.y.corrected = sum(discharge.km3.y.corrected))
+
+mean(discharge.summary$discharge.km3.y.corrected)
+
+length(unique(discharge.yearly$transfer.name))
+length(unique(discharge.yearly$reservoir.id))
+length(unique(discharge.yearly$country))
+length(unique(energy.budget.yearly$transfer.name))
+setdiff(unique(energy.budget.yearly$transfer.name), unique(discharge.yearly$transfer.name))
+setdiff(unique(discharge.yearly$transfer.name), unique(energy.budget.yearly$transfer.name))
+
 countries.2021 <- energy.countries %>% 
   filter(datetime == '2021-01-01')
 
@@ -31,8 +44,20 @@ consumption.intensity <- energy.consumption.yearly %>%
   group_by(country, transfer.name, section.id.unique, segment.id, pumping.lift.m) %>% 
   summarise(energy.kwh.m3.low = mean(energy.kwh.m3.low, na.rm=T),
             energy.kwh.m3.mean = mean(energy.kwh.m3.mean, na.rm=T),
-            energy.kwh.m3.high = mean(energy.kwh.m3.high,  na.rm=T)
+            energy.kwh.m3.high = mean(energy.kwh.m3.high,  na.rm=T),
+            energy.kwh.m3.km.low = mean(energy.kwh.m3.km.low, na.rm=T),
+            energy.kwh.m3.km.mean = mean(energy.kwh.m3.km.mean, na.rm=T),
+            energy.kwh.m3.km.high = mean(energy.kwh.m3.km.high, na.rm=T)
   )
+
+consumption.intensity.transfers <- consumption.intensity %>% 
+  group_by(transfer.name) %>% 
+  summarise(energy.kwh.m3.low = mean(energy.kwh.m3.low, na.rm=T),
+            energy.kwh.m3.mean = mean(energy.kwh.m3.mean, na.rm=T),
+            energy.kwh.m3.high = mean(energy.kwh.m3.high, na.rm=T),
+            energy.kwh.m3.km.low = mean(energy.kwh.m3.km.low, na.rm=T),
+            energy.kwh.m3.km.mean = mean(energy.kwh.m3.km.mean, na.rm=T),
+            energy.kwh.m3.km.high = mean(energy.kwh.m3.km.high, na.rm=T))
 
 production.2021 <- energy.production.yearly %>% 
   group_by(datetime) %>% 
@@ -48,6 +73,28 @@ consumption.2021 <- energy.consumption.yearly %>%
 
 # check inside production.2021, consumption.2021 and energy.global for national and global ratios in 2021
 
+
+#### compare first and last decade
+energy.global.first10 <- energy.global[1:10,]
+energy.global.last10 <- energy.global[33:42,]
+
+mean(energy.global.first10$twh.low.p)
+mean(energy.global.first10$twh.mean.p)
+mean(energy.global.first10$twh.high.p)
+
+mean(energy.global.last10$twh.low.p)
+mean(energy.global.last10$twh.mean.p)
+mean(energy.global.last10$twh.high.p)
+
+
+mean(energy.global.first10$twh.low.c)
+mean(energy.global.first10$twh.mean.c)
+mean(energy.global.first10$twh.high.c)
+
+mean(energy.global.last10$twh.low.c)
+mean(energy.global.last10$twh.mean.c)
+mean(energy.global.last10$twh.high.c)
+
 #### consumption avg per transfer discussion ####
 swp.c <- energy.consumption.yearly %>% 
   filter(transfer.name == 'California_State_Water_Project') %>% 
@@ -55,6 +102,30 @@ swp.c <- energy.consumption.yearly %>%
   summarise(energy.twh.low = sum(energy.twh.low),
             energy.twh.mean = sum(energy.twh.mean),
             energy.twh.high = sum(energy.twh.high))
+
+swp.c.intensity <- energy.consumption.yearly %>% 
+  filter(transfer.name == 'California_State_Water_Project') %>% 
+  group_by(segment.id) %>% 
+  summarise(energy.kwh.m3.low = mean(energy.kwh.m3.low),
+            energy.kwh.m3.mean = mean(energy.kwh.m3.mean),
+            energy.kwh.m3.high = mean(energy.kwh.m3.high))
+
+mean(swp.c.intensity$energy.kwh.m3.low)
+mean(swp.c.intensity$energy.kwh.m3.mean)
+mean(swp.c.intensity$energy.kwh.m3.high)
+
+
+snt.e <- energy.consumption.yearly %>% 
+  filter(transfer.name == 'South_North_Transfer_Eastern') %>% 
+  group_by(datetime, transfer.name) %>% 
+  summarise(energy.twh.low = sum(energy.twh.low),
+            energy.twh.mean = sum(energy.twh.mean),
+            energy.twh.high = sum(energy.twh.high)) %>% 
+  filter(year(datetime) > 2013)
+
+mean(snt.e$energy.twh.low)
+mean(snt.e$energy.twh.mean)
+mean(snt.e$energy.twh.high)
 
 swp.p <- energy.production.yearly %>% 
   filter(transfer.name == 'California_State_Water_Project') %>% 
@@ -75,34 +146,38 @@ max.transfers.c <- energy.consumption.yearly %>%
             energy.twh.mean = max(energy.twh.mean,na.rm=T),
             energy.twh.high = max(energy.twh.high,na.rm=T))
 
-avg.transfers.c.gwh <- avg.transfers.c %>%  
-  mutate(gwh.low = energy.twh.low * 1000,
-         gwh.mean = energy.twh.mean * 1000,
-         gwh.high = energy.twh.high * 1000,
-         ) %>% 
+# avg.transfers.c.gwh <- avg.transfers.c %>%  
+#   mutate(gwh.low = energy.twh.low * 1000,
+#          gwh.mean = energy.twh.mean * 1000,
+#          gwh.high = energy.twh.high * 1000,
+#          ) %>% 
+#   filter(transfer.name == 'California_State_Water_Project' |
+#            transfer.name == 'Colorado_River_Aqueduct')
+# 
+# 
+# max.transfers.c.gwh <- max.transfers.c %>%  
+#   mutate(gwh.low = energy.twh.low * 1000,
+#          gwh.mean = energy.twh.mean * 1000,
+#          gwh.high = energy.twh.high * 1000,
+#   ) %>% 
+#   filter(transfer.name == 'California_State_Water_Project' |
+#            transfer.name == 'Colorado_River_Aqueduct')
+
+swp.cra.together <- energy.consumption.yearly %>% 
   filter(transfer.name == 'California_State_Water_Project' |
-           transfer.name == 'Colorado_River_Aqueduct')
+           transfer.name == 'Colorado_River_Aqueduct') %>% 
+  group_by(datetime) %>% 
+  summarise(energy.twh.low = sum(energy.twh.low),
+            energy.twh.mean = sum(energy.twh.mean),
+            energy.twh.high = sum(energy.twh.high))
 
+mean(swp.cra.together$energy.twh.low) * 1000
+mean(swp.cra.together$energy.twh.mean) * 1000
+mean(swp.cra.together$energy.twh.high) * 1000
 
-max.transfers.c.gwh <- max.transfers.c %>%  
-  mutate(gwh.low = energy.twh.low * 1000,
-         gwh.mean = energy.twh.mean * 1000,
-         gwh.high = energy.twh.high * 1000,
-  ) %>% 
-  filter(transfer.name == 'California_State_Water_Project' |
-           transfer.name == 'Colorado_River_Aqueduct')
-
-sum(avg.transfers.c.gwh$gwh.low)
-sum(avg.transfers.c.gwh$gwh.mean)
-sum(avg.transfers.c.gwh$gwh.high)
-
-sum(max.transfers.c.gwh$gwh.low)
-sum(max.transfers.c.gwh$gwh.mean)
-sum(max.transfers.c.gwh$gwh.high)
 
 #### global fig. 4 ####
-energy.global.first10 <- energy.global[1:10,]
-energy.global.last10 <- energy.global[33:42,]
+
 
 
 
@@ -122,12 +197,23 @@ mean(energy.global.last10$ratio.electricity.low.p)
 mean(energy.global.last10$ratio.electricity.mean.p)
 mean(energy.global.last10$ratio.electricity.high.p)
 
-#### countries fig.4 ###
+mean(energy.global.last10$ratio.electricity.low.c)
+mean(energy.global.last10$ratio.electricity.mean.c)
+mean(energy.global.last10$ratio.electricity.high.c)
+
+#### countries fig. 5 ###
 countries.avg.hydro <- energy.production.yearly %>% 
   group_by(datetime, country) %>% 
   summarise(energy.twh.low = sum(energy.twh.low),
             energy.twh.mean = sum(energy.twh.mean),
-            energy.twh.high = sum(energy.twh.high))
+            energy.twh.high = sum(energy.twh.high)) 
+
+countries.avg.hydro.avg <- countries.avg.hydro %>% 
+  group_by(country) %>% 
+  summarise(energy.twh.low = mean(energy.twh.low),
+            energy.twh.mean = mean(energy.twh.mean),
+            energy.twh.high = mean(energy.twh.high))
+
 
 energy.countries.stuff <- energy.countries %>% 
   group_by(datetime, Country) %>% 
@@ -165,7 +251,15 @@ countries.avg.pump <- energy.consumption.yearly %>%
             energy.twh.mean = mean(energy.twh.mean),
             energy.twh.high = mean(energy.twh.high))
 
+# 
+# countries.avg.pump.others <- countries.avg.pump %>% 
+#   filter(country != 'India') %>% 
+#   filter(country != 'China') %>% 
+#   filter(country != 'USA')
 
+# sum(countries.avg.pump.others$energy.twh.low)
+# sum(countries.avg.pump.others$energy.twh.mean)
+# sum(countries.avg.pump.others$energy.twh.high)
 
 #### ####
 bypass.stuf <- bypass.infrastructure %>% 
@@ -186,6 +280,10 @@ energy.savings.mean <- energy.savings.summary %>%
             energy.twh.mean = mean(energy.twh.mean),
             energy.twh.high = mean(energy.twh.high))
 
+sum(energy.savings.mean$energy.twh.low)
+sum(energy.savings.mean$energy.twh.mean)
+sum(energy.savings.mean$energy.twh.high)
+
 
 # sum(reservoirs.ibwt$capacity.mw)
 # sum(reservoirs.ibwt$head.m)
@@ -196,11 +294,6 @@ hydropower.intensity <- energy.production.yearly %>%
             energy.m3.kwh.mean = mean(energy.m3.kwh.mean, na.rm=T),
             energy.m3.kwh.high = mean(energy.m3.kwh.high,  na.rm=T)
   )
-# %>% 
-#   group_by(transfer.name) %>% 
-#   summarise(energy.m3.kwh.low = mean(energy.m3.kwh.low, na.rm=T),
-#             energy.m3.kwh.mean = mean(energy.m3.kwh.mean, na.rm=T),
-#             energy.m3.kwh.high = mean(energy.m3.kwh.high,  na.rm=T))
 
 summary(hydropower.intensity$energy.m3.kwh.low)
 summary(hydropower.intensity$energy.m3.kwh.mean)
@@ -216,6 +309,12 @@ consumption.intensity <- energy.consumption.yearly %>%
             energy.kwh.m3.high = mean(energy.kwh.m3.high,  na.rm=T)
   )
 
+summary(consumption.intensity$energy.kwh.m3.low)
+summary(consumption.intensity$energy.kwh.m3.mean)
+summary(consumption.intensity$energy.kwh.m3.high)
+
+
+
 intensity.c.transfers <- consumption.intensity %>% 
   group_by(transfer.name)  %>% 
   summarise(energy.kwh.m3.low = median(energy.kwh.m3.low, na.rm=T),
@@ -226,6 +325,10 @@ intensity.c.transfers <- consumption.intensity %>%
 mean(intensity.c.transfers$energy.kwh.m3.low)
 mean(intensity.c.transfers$energy.kwh.m3.mean)
 mean(intensity.c.transfers$energy.kwh.m3.high)
+
+summary(intensity.c.transfers$energy.kwh.m3.low)
+summary(intensity.c.transfers$energy.kwh.m3.mean)
+summary(intensity.c.transfers$energy.kwh.m3.high)
 
 length(unique(consumption.intensity$country))
 sum(consumption.intensity$pumping.lift.m)
@@ -259,12 +362,16 @@ summary.xd <- energy.countries %>%
   ) %>% 
   arrange(twh.mean.c)
 
-summary.other <- summary.xd %>% 
-  slice(1:7)
+# summary.other <- summary.xd %>% 
+#   slice(1:7)
+# 
+# sum(summary.other$twh.low.c)
+# sum(summary.other$twh.mean.c)
+# sum(summary.other$twh.high.c)
 
-sum(summary.other$twh.low.c)
-sum(summary.other$twh.mean.c)
-sum(summary.other$twh.high.c)
+mean(summary.xd$ratio.electricity.low.c)
+mean(summary.xd$ratio.electricity.mean.c)
+mean(summary.xd$ratio.electricity.high.c)
 
 mean(summary.xd$ratio.electricity.low.p)
 mean(summary.xd$ratio.electricity.mean.p)

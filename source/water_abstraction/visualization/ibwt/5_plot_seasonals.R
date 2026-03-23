@@ -18,13 +18,13 @@ wg <- map_data("world")
 
 #### load ####
 section.info.df <- read.csv(
-  paste0(inputDirDischarge, '0_timeseries_raw/1_0_bias_correction_sections.csv'))
+  paste0(inputDirDischarge, '1_bias_corrected/1_0_bias_correction_sections.csv'))
 sections.reservoirs <- read.csv(
   paste0(inputDirElevation, '0_0_sections_reservoirs.csv'))
 
 discharge.monthly.df <- read.csv(
   paste0(inputDirDischarge, 
-         '1_bias_corrected/0_0_discharge_bias_corrected_monthly.csv')) %>% 
+         '1_bias_corrected/2_0_discharge_bias_corrected_monthly.csv')) %>% 
   mutate(datetime = as.Date(datetime)) %>% 
   mutate(
     year.continuous = (year(datetime)),
@@ -33,7 +33,7 @@ discharge.monthly.df <- read.csv(
 
 discharge.yearly.df <- read.csv(
   paste0(inputDirDischarge, 
-         '1_bias_corrected/0_1_discharge_bias_corrected_yearly.csv')) %>% 
+         '1_bias_corrected/2_1_discharge_bias_corrected_yearly.csv')) %>% 
   mutate(datetime = as.Date(datetime))
 
 segments.info <- read.csv(paste0(inputDirDischarge, '2_infrastructure/1_information_pumping.csv'))

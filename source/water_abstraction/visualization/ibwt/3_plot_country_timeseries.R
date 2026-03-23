@@ -20,7 +20,7 @@ outputDirViz <- '../../../../output/water_abstraction/visualization/ibwt/'
 
 #### load ####
 energy.countries.ts <- read.csv(paste0(inputDirEnergy, '6_energy_countries_1980_2021.csv')) %>% 
-  mutate(datetime = as.Date(datetime))
+  mutate(datetime = as.Date(datetime)) 
 energy.countries.ts$Country[which(energy.countries.ts$Country == 'South_Africa')] <- 'South Africa'
 
 
@@ -37,7 +37,7 @@ p.p <- ggplot(energy.countries.ts
   scale_color_manual(values = my.palette) +
   xlab('Year')+
   ylab('TWh y<sup>-1</sup>') +
-  ylim(c(0,50)) +
+  ylim(c(0,95)) +
   theme_bw() +
   theme(axis.text = element_text(size=14),
         axis.title = element_text(size=14),
@@ -62,7 +62,8 @@ p.c <- ggplot(energy.countries.ts
   scale_color_manual(values = my.palette) +
   xlab('Year')+
   ylab('TWh y<sup>-1</sup>') +
-  scale_y_continuous(position = "right", limits = c(0,50)) +
+  scale_y_continuous(position = "right", 
+                     limits = c(0,95)) +
   theme_bw() +
   theme(axis.text = element_text(size=14),
         legend.position = 'bottom',
@@ -113,7 +114,8 @@ p.ratio.c <- ggplot(energy.countries.ts
   scale_color_manual(values = my.palette) +
   xlab('Year')+
   ylab('Ratio (%)') +
-  scale_y_continuous(position = "right", limits = c(0,45)) +
+  scale_y_continuous(position = "right", 
+                     limits = c(0,45)) +
   theme_bw() +
   theme(axis.text = element_text(size=14),
         axis.title = element_text(size=14),
@@ -126,22 +128,23 @@ p.ratio.c <- ggplot(energy.countries.ts
 
 #### patchwork ####
 patch.validation <- (p.p + p.c) / (p.ratio.p + p.ratio.c) + 
-  # plot_annotation(title = "Relationships of IBWT megaprojects with countries' energy supplies\n",
-  #                 theme = theme(plot.title = element_text(hjust = 0.5, size = 22))) +
   plot_layout(guides = "collect") &
   theme(legend.position = 'bottom',
         legend.text = element_markdown(size=16),
-        legend.title = element_text(size=18),
+        legend.title = element_text(size=18, vjust=0.8),
         legend.spacing = unit(2, 'cm'),
         axis.title = element_markdown(size=18),
         axis.text = element_markdown(size=16),
         plot.title = element_text(size=20),
         legend.key.spacing.x = unit(1, 'cm'),
-        legend.key.spacing.y = unit(0.5, 'cm'),
-        legend.spacing.y = unit(1, 'cm')
+        legend.key.spacing.y = unit(0.2, 'cm'),
+        legend.spacing.y = unit(0.6, 'cm')
         )
 
 
 ggsave(paste0(outputDirViz,'energy_countries_timeseries.png'), patch.validation,
        height=12, width=12, units='in', dpi=300, bg='white')
 file.show(paste0(outputDirViz,'energy_countries_timeseries.png'))
+
+
+####

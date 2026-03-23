@@ -15,9 +15,9 @@ intake.info <- read.csv(
   paste0(inputDirDischarge, '2_infrastructure/3_information_discharge_only.csv'))
 
 discharge.monthly.df <- read.csv(
-  paste0(inputDirDischarge, '1_bias_corrected/0_0_discharge_bias_corrected_monthly.csv'))
+  paste0(inputDirDischarge, '1_bias_corrected/2_0_discharge_bias_corrected_monthly.csv'))
 discharge.yearly.df <- read.csv(
-  paste0(inputDirDischarge, '1_bias_corrected/0_1_discharge_bias_corrected_yearly.csv'))
+  paste0(inputDirDischarge, '1_bias_corrected/2_1_discharge_bias_corrected_yearly.csv'))
 
 
 discharge.month.list <- list()

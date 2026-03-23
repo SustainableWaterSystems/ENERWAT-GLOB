@@ -12,7 +12,8 @@ library(patchwork)
 
 my.palette <- c('#1E81B0',"#BEAED4", '#648FFF','#FE6100')
 my.palette2 <- c('#648FFF','#FE6100')
-my.palette3 <- c("#54A29B","#c6c507")
+my.palette.int.p <- c("#9167c8", "#df88fa")
+my.palette.int.c <- c("#e1af93", "#fbdba0")
 
 ####
 inputDir <- '../../../../output/water_abstraction/model/ibwt/'
@@ -64,6 +65,11 @@ file.show(paste0(outputDirViz, 'country_energy.png'))
 
 
 #### paper stats ####
+
+km3.total <- plot.data.discharge %>% 
+  filter(var.names == 'km3.total')
+
+
 mean(as.numeric(df.intensity.c$low), na.rm=T)
 mean(as.numeric(df.intensity.c$mean), na.rm=T)
 mean(as.numeric(df.intensity.c$high), na.rm=T)
@@ -94,3 +100,6 @@ sum(last.10.discharge$km3.total)
 mean(year.discharge.types$km3.production, na.rm=T)
 mean(year.discharge.types$km3.consumption, na.rm=T)
 mean(year.discharge.types$km3.discharge.only, na.rm=T)
+
+australia.check <- limits.10.energy %>% 
+  filter(country == 'Australia')

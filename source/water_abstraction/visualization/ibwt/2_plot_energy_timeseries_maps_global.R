@@ -36,7 +36,7 @@ consumption.monthly <- read.csv(
 consumption.yearly <- read.csv(
   paste0(inputDirEnergy, '1_energy_consumption_yearly.csv'))
 
-sections.coord <- read.csv(paste0(inputDirDischarge, '0_timeseries_raw/0_information_sections.csv')) 
+sections.coord <- read.csv(paste0(inputDirDischarge, '1_bias_corrected/0_information_sections.csv')) 
 intakes.coord.hydropower <- read.csv(paste0(inputDirDischarge, '2_infrastructure/0_information_hydropower.csv'))
 intakes.coord.pumping <- read.csv(paste0(inputDirDischarge, '2_infrastructure/1_information_pumping.csv'))
 

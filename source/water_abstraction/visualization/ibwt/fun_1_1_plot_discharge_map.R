@@ -132,7 +132,7 @@ p.map.discharge <- ggplot() +
              ),
              alpha = 0.9, stroke = 0.3)+
   ylim(-55,70) +
-  ggtitle('\nB. Reservoir discharge (1979-2023)') +
+  ggtitle('\nB. Reservoir discharge (1980-2021)') +
   theme_map() +
   scale_shape_manual(values = c("positive" = 24, "negative" = 25),
                      name = 'Trend',
@@ -151,5 +151,5 @@ p.map.discharge <- ggplot() +
         plot.title = element_text(hjust = 0.5, size=16, face='plain')) +
   guides(fill=guide_legend(ncol = 2, override.aes = list(size = 3, shape = 22)),
     shape = guide_legend(override.aes = list(size = 3)),
-    size = guide_legend(nrow=1))
+    size = guide_legend(nrow=1, label.position = 'bottom'))
 

@@ -33,7 +33,7 @@ p.map.hydropower <- ggplot() +
              ),
              alpha = 0.9, stroke = 0.3)+
   ylim(-55,70) +
-  ggtitle('A. Hydropower plants - Turbine head height') +
+  ggtitle('A. Power stations - Hydropower head') +
   scale_color_gradient(low="#54A29B", high="#c6c507") +
   scale_fill_gradient(low="#54A29B", high="#c6c507") +
   theme_map() +
@@ -46,8 +46,8 @@ p.map.hydropower <- ggplot() +
         legend.text = element_text(size=11),
         plot.title = element_text(hjust = 0.5, size=16),
         legend.key.width = unit(1, 'cm')) +
-  guides(color = guide_colorbar(title = "Head (m)"),
-         fill = guide_colorbar(title = "Head (m)"))
+  guides(color = guide_colorbar(title = "Hydropower head (m)"),
+         fill = guide_colorbar(title = "Hydropower head (m)"))
 
 p.map.pumping <- ggplot() +
   geom_map(
@@ -63,7 +63,7 @@ p.map.pumping <- ggplot() +
              ),
              alpha = 0.9, stroke = 0.3)+
   ylim(-55,70) +
-  ggtitle('B. Pumping stations - Lift height')  +
+  ggtitle('B. Pumping stations - Pumping lift')  +
   scale_color_gradient(low="#54A29B", high="#c6c507") +
   scale_fill_gradient(low="#54A29B", high="#c6c507") +
   theme_map() +
@@ -95,7 +95,7 @@ p.map.bypass <- ggplot() +
              ),
              alpha = 0.9, stroke = 0.3)+
   ylim(-55,70) +
-  ggtitle('C. Tunnels and aqueducts - Bypass height') +
+  ggtitle('C. Tunnels and aqueducts - Pumping lift bypass') +
   scale_color_gradient(low="#54A29B", high="#c6c507") +
   scale_fill_gradient(low="#54A29B", high="#c6c507") +
   theme_map() +
@@ -108,13 +108,13 @@ p.map.bypass <- ggplot() +
         legend.text = element_text(size=11),
         plot.title = element_text(hjust = 0.5, size=16),
         legend.key.width = unit(1, 'cm')) +
-  guides(color = guide_colorbar(title = "Net bypass (m)"),
-         fill = guide_colorbar(title = "Net bypass (m)"),
+  guides(color = guide_colorbar(title = "Pumping lift bypass (m)"),
+         fill = guide_colorbar(title = "Pumping lift bypass (m)"),
          shape = guide_legend(title = "Bypass type"))
 
 #### patch ####
 p.patch <- p.map.hydropower / p.map.pumping / p.map.bypass
 
 ggsave(paste0(outputDirViz,'infrastructure_heights.png'), p.patch,
-       height=10, width=6, units='in', dpi=300, bg='white')
+       height=10, width=7, units='in', dpi=300, bg='white')
 file.show(paste0(outputDirViz,'infrastructure_heights.png'))

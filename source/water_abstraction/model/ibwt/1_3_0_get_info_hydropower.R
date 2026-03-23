@@ -20,8 +20,8 @@ dir.create(outputDir, recursive = T, showWarnings = F)
 #### load 
 shah2025 <- read.csv(paste0(inputDirHeads, 'GloHydroRes_vs1.csv'))
 
-data.sections <- read.csv(paste0(inputDir,'0_timeseries_raw/1_0_bias_correction_sections.csv'))
-data.segments <- read.csv(paste0(inputDir,'0_timeseries_raw/1_1_bias_correction_segments.csv'))
+data.sections <- read.csv(paste0(inputDir,'1_bias_corrected/1_0_bias_correction_sections.csv'))
+data.segments <- read.csv(paste0(inputDir,'1_bias_corrected/1_1_bias_correction_segments.csv'))
 
 power.intakes <- data.segments %>% 
   filter(intake.type == 'Power station')
@@ -73,12 +73,12 @@ for(i in seq(length(countries.ibwt))){
     
     #get plant data from shah 
     shah.match <- country.shah[country.idx,] %>%
-      select(ID, name, capacity_mw, plant_type, 
+      select(ID, name, year, capacity_mw, plant_type, 
              dam_height_m, head_m,
              plant_lat, plant_lon) %>% 
       mutate(distance.match = distances.min[j])
     
-    colnames(shah.match) <- c('id.shah2025','plant.name','capacity.mw',
+    colnames(shah.match) <- c('id.shah2025','plant.name', 'year.shah2025', 'capacity.mw',
                               'plant.type', 'dam.height.m','head.m',
                               'lat.shah2025','lon.shah2025', 'match.distance.m'
                               )

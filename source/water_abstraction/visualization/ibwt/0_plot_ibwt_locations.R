@@ -13,7 +13,7 @@ palette.purposes <- c('#88CCEE', "#FDC086", '#44AA99','#CC6677')
 
 #### load ####
 inputDir <-
-  '../../../../output/water_abstraction/model/ibwt/1_discharge_timeseries/0_timeseries_raw/'
+  '../../../../output/water_abstraction/model/ibwt/1_discharge_timeseries/1_bias_corrected/'
 
 outputDir <- '../../../../output/water_abstraction/visualization/ibwt/'
 
@@ -57,17 +57,16 @@ p.map <- ggplot() +
   scale_fill_gradient(low = 'darkolivegreen4', high = 'gold1',
                       limits = c(0,1500)) +
   scale_size(name="Number of reservoirs",
-             breaks=c(1,3,5,7,10),
+             breaks=c(1,2,3,5,6),
              range=c(2,6)) +
   guides(color=guide_legend(title="Main purpose"),
          fill=guide_colorbar(title="Project length (km)", direction = 'horizontal',
                             label.position = 'bottom',
                             theme = theme(
-                              legend.key.width  = unit(8, "lines"))),
+                              legend.key.width  = unit(8, "lines")), order = 1),
          size=guide_legend(title='Number of reservoirs', direction = 'horizontal',
-                           label.position = 'bottom')
-         )
-
+                           label.position = 'bottom', order = 2)
+         ) 
 #### cumulative length over time
 
 p.length <- ggplot() + 
