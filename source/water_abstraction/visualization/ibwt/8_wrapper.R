@@ -1,8 +1,0 @@
-source('0_plot_ibwt_locations.R')
-source("1_plot_discharge_types_map.R")
-source("2_plot_energy_timeseries_maps_global.R")
-source("3_plot_country_timeseries.R")
-source("4_country_aggregates.R")
-source("5_plot_seasonals.R")
-source("6_energy_budgets_pc.R")
-source("7_infrastructure_heights.R")
