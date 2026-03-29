@@ -8,7 +8,6 @@ Inputs and outputs are available on Zenodo ([inputs](https://doi.org/10.5281/zen
 ## Content
 #### 1. Tools
 #### 2. Essential literature
-#### 3. Notes on source code
 
 ## 1. Tools 
 * [TWh to EJ converter](https://www.convert-measurement-units.com/convert+Terawatt+hour+to+Exajoule.php)
@@ -25,9 +24,4 @@ Inputs and outputs are available on Zenodo ([inputs](https://doi.org/10.5281/zen
 * [Energy consumption for water use cycles in different countries: A review](http://dx.doi.org/10.1016/j.apenergy.2016.06.114)
 * [A review of energy-for-water data in energy-water nexus publications](https://doi.org/10.1088/1748-9326/abcc2a)
 * [Global energy use and carbon emissions from irrigated agriculture](https://doi.org/10.1038/s41467-024-47383-5)
-
-## 3. Notes on source code
-There may be conflicts between the dplyr and MASS packages when using the function "select". In that case, please restart your RStudio session before running a script with such conflict.
-
-
 
