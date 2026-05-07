@@ -20,7 +20,7 @@ outputDir <- '../../../../output/wtt/visualization/general/'
 wg <- map_data("world")
 
 countries.raster <- vroom(paste0(inputDirWorld, 'general/countries_raster_5arcmin.csv')) %>% 
-  select(cell_ID, cell_lon, cell_lat) 
+  dplyr::select(cell_ID, cell_lon, cell_lat) 
 
 energy.plants.desal <- read.csv(
   paste0(inputDirData, 'desalination/2_energy/energy_plants_2015_desal.csv'))
@@ -37,7 +37,7 @@ energy.5arcmin.desal <- energy.plants.desal  %>%
   group_by(pcrglobwb_cellID) %>% 
   summarise(gwh.y.mean = sum(kwh.y.mean) / 10^6) %>% 
   inner_join(countries.raster %>% 
-               select(cell_ID, cell_lon, cell_lat) %>% 
+               dplyr::select(cell_ID, cell_lon, cell_lat) %>% 
                rename(pcrglobwb_cellID = cell_ID)) %>% 
   arrange(gwh.y.mean)  %>% 
   mutate(energy.cat = case_when(
@@ -55,7 +55,7 @@ energy.5arcmin.wwt <- energy.plants.wwt %>%
   group_by(pcrglobwb_cellID) %>% 
   summarise(gwh.y.mean = sum(kwh.y.mean) / 10^6) %>% 
   inner_join(countries.raster %>% 
-               select(cell_ID, cell_lon, cell_lat) %>% 
+               dplyr::select(cell_ID, cell_lon, cell_lat) %>% 
                rename(pcrglobwb_cellID = cell_ID)) %>% 
   arrange(gwh.y.mean) %>% 
   mutate(energy.cat = case_when(
@@ -83,8 +83,9 @@ p.desal <- ggplot()+
     aes(long, lat, map_id = region),
     color = "white", fill= "grey", alpha=0.6
   ) +
-  geom_point(data = energy.5arcmin.desal, aes(x = cell_lon, y = cell_lat, 
-                                      fill= energy.cat),
+  geom_point(data = energy.5arcmin.desal, aes(x = cell_lon, y = cell_lat,
+                                              color = energy.cat,
+                                              fill= energy.cat),
              shape = 22,
              size = 1, stroke=0
             ) +
@@ -96,6 +97,7 @@ p.desal <- ggplot()+
   geom_segment(aes(x=bbox.4[3], xend=bbox.4[3], y=bbox.4[2], yend=bbox.4[4]))+
   geom_segment(aes(x=bbox.4[1], xend=bbox.4[3], y=bbox.4[2], yend=bbox.4[2]))+
   geom_segment(aes(x=bbox.4[1], xend=bbox.4[3], y=bbox.4[4], yend=bbox.4[4]))+
+  scale_color_manual(values = my.palette)+
   scale_fill_manual(values = my.palette)+
   theme_map() +
   ggtitle('Desalination')  +
@@ -111,7 +113,8 @@ p.wwt <- ggplot()+
     color = "white", fill= "grey", alpha=0.6
   ) +
   geom_point(data = energy.5arcmin.wwt, aes(x = cell_lon, y = cell_lat, 
-                                              fill= energy.cat),
+                                            color=energy.cat,
+                                            fill=energy.cat),
              shape = 22,
              size = 0.5, stroke=0
   ) +
@@ -123,6 +126,7 @@ p.wwt <- ggplot()+
   geom_segment(aes(x=bbox.3[3], xend=bbox.3[3], y=bbox.3[2], yend=bbox.3[4]))+
   geom_segment(aes(x=bbox.3[1], xend=bbox.3[3], y=bbox.3[2], yend=bbox.3[2]))+
   geom_segment(aes(x=bbox.3[1], xend=bbox.3[3], y=bbox.3[4], yend=bbox.3[4]))+
+  scale_color_manual(values = my.palette)+
   scale_fill_manual(values = my.palette)+
   theme_map() +
   ggtitle('Wastewater treatment') +
@@ -141,11 +145,13 @@ energy.plot.desal.z1 <- ggplot()+
     aes(long, lat, map_id = region),
     color = "white", fill= "grey", alpha=0.6
   ) +
-  geom_point(data = energy.5arcmin.desal, aes(x = cell_lon, y = cell_lat,
-                                              fill = energy.cat),
+  geom_point(data = energy.5arcmin.desal, aes(x = cell_lon, y = cell_lat, 
+                                              color=energy.cat,
+                                              fill=energy.cat),
              shape = 22,
              size = 1.5, stroke=0
   ) +
+  scale_color_manual(values = my.palette)+
   scale_fill_manual(values = my.palette)+
   theme_map() +
   ylim(bbox.1[2], bbox.1[4])+
@@ -159,11 +165,13 @@ energy.plot.desal.z2 <- ggplot()+
     aes(long, lat, map_id = region),
     color = "white", fill= "grey", alpha=0.6
   ) +
-  geom_point(data = energy.5arcmin.desal, aes(x = cell_lon, y = cell_lat,
-                                              fill= energy.cat),
+  geom_point(data = energy.5arcmin.desal, aes(x = cell_lon, y = cell_lat, 
+                                              color=energy.cat,
+                                              fill=energy.cat),
              shape = 22,
              size = 1.5, stroke=0
   ) +
+  scale_color_manual(values = my.palette)+
   scale_fill_manual(values = my.palette)+
   theme_map() +
   ylim(bbox.4[2], bbox.4[4])+
@@ -178,10 +186,12 @@ energy.plot.wwt.z1 <- ggplot()+
     color = "white", fill= "grey", alpha=0.6
   ) +
   geom_point(data = energy.5arcmin.wwt, aes(x = cell_lon, y = cell_lat, 
-                                              fill= energy.cat),
+                                            color=energy.cat,
+                                            fill=energy.cat),
              shape = 22,
              size = 1, stroke=0
   ) +
+  scale_color_manual(values = my.palette)+
   scale_fill_manual(values = my.palette)+
   theme_map() +
   ylim(bbox.2[2], bbox.2[4])+
@@ -195,10 +205,12 @@ energy.plot.wwt.z2 <- ggplot()+
     color = "white", fill= "grey", alpha=0.6
   ) +
   geom_point(data = energy.5arcmin.wwt, aes(x = cell_lon, y = cell_lat, 
-                                              fill= energy.cat),
+                                            color=energy.cat,
+                                            fill=energy.cat),
              shape = 22,
              size = 0.7, stroke=0
   ) +
+  scale_color_manual(values = my.palette)+
   scale_fill_manual(values = my.palette)+
   theme_map() +
   ylim(bbox.3[2], bbox.3[4])+
