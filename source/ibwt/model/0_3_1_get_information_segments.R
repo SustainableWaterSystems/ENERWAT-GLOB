@@ -47,7 +47,7 @@ for(i in seq(length(n.countries))){
     segments.n <- list.files(segments.folder, full.names = F)
     
     transfer.sections <- sections.information %>% 
-      filter(ibwt.project.name == transfer.name)
+      filter(ibwt.branch == transfer.name)
     
     list.segments <- list()
     
@@ -106,15 +106,23 @@ for(i in seq(length(n.countries))){
 intake.dataframe.df <- do.call(rbind, list.countries)
 
 section.info.sel <- sections.information %>% 
-  select(Country, ibwt.project.name, initial.year, 
+  select(Country, ibwt.branch, initial.year, 
          Section, reservoir_ID, Purpose.main,
          lon, lat) %>% 
-  rename(transfer.name = ibwt.project.name,
+  rename(transfer.name = ibwt.branch,
          section.id = Section,
          reservoir.id = reservoir_ID,
          reservoir.lon = lon,
-         reservoir.lat = lat)
+         reservoir.lat = lat) 
 
 intake.info.reservoir <- inner_join(intake.dataframe.df, section.info.sel)
 
 write.csv(intake.info.reservoir, paste0(outputDir, '1_information_intakes.csv'), row.names = F)
+
+####
+sections.length <- intake.info.reservoir %>% 
+  filter(Country != 'Libya') %>% 
+  group_by(Country, transfer.name, section.id) %>% 
+  summarise(section.length = sum(segment.length.km))
+
+summary(sections.length$section.length)

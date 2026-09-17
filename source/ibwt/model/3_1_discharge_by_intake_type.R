@@ -21,7 +21,7 @@ info.discharge.only <- read.csv(
 
 #### timeseries
 discharge.yearly.df <- read.csv(
-  paste0(inputDirDischarge, '1_bias_corrected/2_1_discharge_bias_corrected_yearly.csv'))
+  paste0(inputDirDischarge, '1_bias_corrected/1_discharge_bias_corrected_yearly.csv'))
 
 energy.production.yearly <- read.csv(paste0(inputDir, '2_energy/0_energy_production_yearly.csv'))
 energy.consumption.yearly <- read.csv(paste0(inputDir, '2_energy/1_energy_consumption_yearly.csv'))
@@ -44,23 +44,23 @@ discharge.discharge.only <- discharge.yearly.df %>%
 #### make yearly summaries (total) ####
 discharge.summarise.total <- discharge.yearly.df %>% 
   group_by(datetime) %>% 
-  summarise(discharge.km3.y.corrected = sum(discharge.km3.y.corrected)) %>% 
-  rename(km3.total = discharge.km3.y.corrected)
+  summarise(discharge.km3.year.corrected = sum(discharge.km3.year.corrected)) %>% 
+  rename(km3.total = discharge.km3.year.corrected)
 
 discharge.summarise.consumption <- discharge.consumption %>% 
   group_by(datetime) %>% 
-  summarise(discharge.km3.y.corrected = sum(discharge.km3.y.corrected)) %>% 
-  rename(km3.consumption = discharge.km3.y.corrected)
+  summarise(discharge.km3.year.corrected = sum(discharge.km3.year.corrected)) %>% 
+  rename(km3.consumption = discharge.km3.year.corrected)
 
 discharge.summarise.production <- discharge.production %>% 
   group_by(datetime) %>% 
-  summarise(discharge.km3.y.corrected = sum(discharge.km3.y.corrected)) %>% 
-  rename(km3.production = discharge.km3.y.corrected)
+  summarise(discharge.km3.year.corrected = sum(discharge.km3.year.corrected)) %>% 
+  rename(km3.production = discharge.km3.year.corrected)
 
 discharge.summarise.discharge.only <- discharge.discharge.only %>% 
   group_by(datetime) %>% 
-  summarise(discharge.km3.y.corrected = sum(discharge.km3.y.corrected)) %>% 
-  rename(km3.discharge.only = discharge.km3.y.corrected)
+  summarise(discharge.km3.year.corrected = sum(discharge.km3.year.corrected)) %>% 
+  rename(km3.discharge.only = discharge.km3.year.corrected)
 
 
 discharge.percs <- inner_join(discharge.summarise.total, 
@@ -75,23 +75,23 @@ discharge.percs <- inner_join(discharge.summarise.total,
 #### by country ####
 discharge.country.total <- discharge.yearly.df %>% 
   group_by(datetime, country) %>% 
-  summarise(discharge.km3.y.corrected = sum(discharge.km3.y.corrected)) %>% 
-  rename(km3.total = discharge.km3.y.corrected)
+  summarise(discharge.km3.year.corrected = sum(discharge.km3.year.corrected)) %>% 
+  rename(km3.total = discharge.km3.year.corrected)
 
 discharge.country.consumption <- discharge.consumption %>% 
   group_by(datetime, country) %>% 
-  summarise(discharge.km3.y.corrected = sum(discharge.km3.y.corrected)) %>% 
-  rename(km3.consumption = discharge.km3.y.corrected)
+  summarise(discharge.km3.year.corrected = sum(discharge.km3.year.corrected)) %>% 
+  rename(km3.consumption = discharge.km3.year.corrected)
 
 discharge.country.production <- discharge.production %>% 
   group_by(datetime, country) %>% 
-  summarise(discharge.km3.y.corrected = sum(discharge.km3.y.corrected)) %>% 
-  rename(km3.production = discharge.km3.y.corrected)
+  summarise(discharge.km3.year.corrected = sum(discharge.km3.year.corrected)) %>% 
+  rename(km3.production = discharge.km3.year.corrected)
 
 discharge.country.discharge.only <- discharge.discharge.only %>% 
   group_by(datetime, country) %>% 
-  summarise(discharge.km3.y.corrected = sum(discharge.km3.y.corrected)) %>% 
-  rename(km3.discharge.only = discharge.km3.y.corrected)
+  summarise(discharge.km3.year.corrected = sum(discharge.km3.year.corrected)) %>% 
+  rename(km3.discharge.only = discharge.km3.year.corrected)
 
 discharge.percs.country <- merge(discharge.country.total, 
                                  discharge.country.consumption, 

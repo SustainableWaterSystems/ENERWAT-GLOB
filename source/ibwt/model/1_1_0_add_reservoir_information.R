@@ -9,14 +9,13 @@ replaceMessage <- function(x, width = 80)
   message(x, appendLF = F)
 }
 
+inputDir <- '../../../output/ibwt/model/'
 
-outputDir <- '../../../output/ibwt/model/'
+inputDirElevation <- paste0(inputDir, '0_elevation_profiles/3_information/')
 
-inputDirElevation <- paste0(outputDir, '0_elevation_profiles/3_information/')
+inputDirDischarge <- paste0(inputDir, '1_discharge_timeseries/0_timeseries_pcrglobwb/1_filtered/')
 
-inputDirDischarge <- paste0(outputDir, '1_discharge_timeseries/0_timeseries_pcrglobwb/1_filtered/')
-
-outputDirData <- paste0(outputDir, '1_discharge_timeseries/1_bias_corrected/')
+outputDirData <- paste0(inputDir, '1_discharge_timeseries/1_bias_corrected/')
 dir.create(outputDirData, recursive = T, showWarnings = F)
 
 #### ####
@@ -68,41 +67,14 @@ for(i in seq(nrow(data.sections))){
   
   #### discharge
   initial.year.transfer.date <- as.Date(paste(section.select$initial.year, 1, 1, sep = "-"))
-
-  discharge.monthly.raw <- read.csv(paste0(
-    inputDirDischarge, 'm3_s_outlet_',
-    section.select$reservoir_ID , '.csv'))
-  
-  discharge.monthly.process <- discharge.monthly.raw %>% 
-    mutate(datetime = as.Date(datetime)) %>% 
-    mutate(month = month(datetime),
-           days.in.month = days_in_month(datetime)) %>% 
-    rename(discharge.m3.s = discharge) %>% 
-    mutate(discharge.m3.month = discharge.m3.s * 60 * 60 * 24 * days.in.month) %>%
-    #cut dates before initial date of water transfer
-    filter(datetime > initial.year.transfer.date) 
-  
-  discharge.year.raw <- discharge.monthly.process %>% 
-    mutate(datetime = floor_date(datetime, 'year')) %>% 
-    group_by(datetime) %>% 
-    summarise(discharge.m3.y = sum(discharge.m3.month)) %>% 
-    mutate(discharge.km3.y = discharge.m3.y / 1000000000) %>% 
-    mutate(country = section.select$Country,
-           reservoir.id = section.select$reservoir_ID,
-           lon = section.select$lon,
-           lat = section.select$lat) %>% 
-    mutate(hemisphere = case_when(lat < 0 ~ "South",
-                                  lat > 0 ~ "North"))
-  
-  discharge.km3.y.mean.raw <- round(mean(discharge.year.raw$discharge.km3.y),3)
   
   #### make avg discharge dataframe
   
   section.discharge.info <- section.select %>% 
-    mutate(discharge.km3.y.mean = discharge.km3.y.mean.raw,
-           intake.type.id = intake.type.id,
-           hemisphere = unique(discharge.year.raw$hemisphere)) %>% 
-    rename(transfer.name = ibwt.project.name,
+    mutate(
+           intake.type.id = intake.type.id
+           ) %>% 
+    rename(transfer.name = ibwt.branch,
            reservoir.id = reservoir_ID,
            initial.year.transfer = initial.year)
   
@@ -115,7 +87,29 @@ section.info.df <- do.call(rbind, section.info.list) %>%
                                         intake.type.id == 2 ~ "Pumping only",
                                         intake.type.id == 3 ~ "Discharge only",
                                         intake.type.id == 4 ~ "Mixed energy",
-                                        intake.type.id == 5 ~ "Mixed energy + Discharge only"))
+                                        intake.type.id == 5 ~ "Mixed energy + Discharge only")) #%>% 
+  # mutate(section.id.unique = seq(nrow(data.sections))) %>% 
+  # relocate(section.id.unique, .before=Country)
+
+#add unique id to sections
+transfer.reservoirs <- section.info.df %>% 
+  group_by(transfer.name, reservoir.id) %>% 
+  summarise(count=n()) %>% 
+  select(-count)
+
+id.vector <- data.frame(seq(nrow(transfer.reservoirs)))
+colnames(id.vector) <- 'section.id.unique'
+
+transfer.reservoirs.unique <- cbind(id.vector, transfer.reservoirs)
+
+data.sections.unique <- inner_join(section.info.df, transfer.reservoirs.unique) %>% 
+ relocate(section.id.unique, .after=reservoir.id)
+
+#add unique id to segments
+data.segments.unique <- data.segments %>% 
+  mutate(segment.id.unique = seq(nrow(data.segments))) %>% 
+  relocate(segment.id.unique, .before=Country)
 
 #### save ####
-write.csv(section.info.df, paste0(outputDirData, '0_information_sections.csv'), row.names = F)
+write.csv(data.sections.unique, paste0(outputDirData, '0_information_sections.csv'), row.names = F)
+write.csv(data.segments.unique, paste0(outputDirData, '0_information_segments.csv'), row.names = F)

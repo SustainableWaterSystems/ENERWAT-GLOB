@@ -4,6 +4,8 @@ library(dplyr)
 library(tidyr)
 library(lubridate)
 
+options(warn=2)
+
 replaceMessage <- function(x, width = 80)
 {
   message("\r", rep(" ", times = width - length(x)), "\r", appendLF = F)
@@ -17,7 +19,8 @@ delta.time <- 1 #year
 t.efficiency.low <- 0.9 #pump efficiency (low value for uncertainty)
 t.efficiency.high <- 1 #pump efficiency (high value for uncertainty)
 capacity.factor.low <- 0.3
-capacity.factor.high <- 0.6
+capacity.factor.high <- 0.8
+capacity.factor.mean <- 0.55
 
 #### directories ####
 inputDir <- '../../../output/ibwt/model/'
@@ -32,10 +35,10 @@ hydropower.head.info <- read.csv(
   paste0(inputDirDischarge, '2_infrastructure/0_information_hydropower.csv'))
 
 discharge.monthly.df <- read.csv(
-  paste0(inputDirDischarge, '1_bias_corrected/2_0_discharge_bias_corrected_monthly.csv'))
+  paste0(inputDirDischarge, '1_bias_corrected/1_discharge_bias_corrected_monthly.csv'))
 
 discharge.yearly.df <- read.csv(
-  paste0(inputDirDischarge, '1_bias_corrected/2_1_discharge_bias_corrected_yearly.csv'))
+  paste0(inputDirDischarge, '1_bias_corrected/1_discharge_bias_corrected_yearly.csv'))
 
 
 #### process ####
@@ -49,6 +52,16 @@ for(i in seq(nrow(hydropower.head.info))){
   hydropower.select <- hydropower.head.info[i,]
   
   reservoir.id.select <- hydropower.select$section.id.unique
+  reservoir.lat <- hydropower.select$reservoir.lat
+  
+  if(!reservoir.id.select %in% discharge.monthly.df$section.id.unique){ 
+    
+    next
+    
+  }
+  
+  if(reservoir.lat > 0){hemisphere.sel <- 'North'}
+  else{hemisphere.sel <- 'South'}
   
   discharge.select.monthly <- discharge.monthly.df %>% 
     filter(section.id.unique == reservoir.id.select)
@@ -56,16 +69,16 @@ for(i in seq(nrow(hydropower.head.info))){
   discharge.select.yearly <- discharge.yearly.df %>% 
     filter(section.id.unique == reservoir.id.select)
   
-  
+
   #### calculate peak yearly production for later adjustments
   # j
   energy.j.high.raw.year <-
-    discharge.select.yearly$discharge.m3.y.corrected * 
-    (g * hydropower.select$head.m) * (rho * delta.time) * t.efficiency.high * capacity.factor.high
+    discharge.select.yearly$discharge.km3.year.corrected * 10^9 *
+    (g * hydropower.select$head.m) * (rho * delta.time) * t.efficiency.high #* capacity.factor.high
   
   energy.j.high.raw.month <- 
     discharge.select.monthly$discharge.km3.month * 10^9 * 
-    (g * hydropower.select$head.m) * (rho * delta.time) * t.efficiency.high * capacity.factor.high
+    (g * hydropower.select$head.m) * (rho * delta.time) * t.efficiency.high #* capacity.factor.high
   
   #### get "number of turbines" based on reported plant capacity
   #mean modelled energy production peak for the highest year
@@ -105,13 +118,14 @@ for(i in seq(nrow(hydropower.head.info))){
   energy.month.segment.df <- discharge.select.monthly %>% 
     mutate(segment.id = hydropower.select$segment.full) %>% 
     relocate(segment.id, .after = reservoir.id) %>% 
-    mutate(head.m = hydropower.select$head.m) %>% 
+    mutate(head.m = hydropower.select$head.m,
+           hemisphere = hemisphere.sel) %>% 
     mutate(energy.j.low = energy.j.low.month,
            energy.j.mean = (energy.j.low.month + energy.j.high.month) / 2,
            energy.j.high = energy.j.high.month) %>% 
-    mutate(energy.kwh.low = energy.j.low / (3.6 * 10^6) * correction.factor.kwh.month,
-           energy.kwh.mean = energy.j.mean / (3.6 * 10^6) * correction.factor.kwh.month,
-           energy.kwh.high = energy.j.high / (3.6 * 10^6) * correction.factor.kwh.month
+    mutate(energy.kwh.low = energy.j.low / (3.6 * 10^6) * correction.factor.kwh.month * capacity.factor.low,
+           energy.kwh.mean = energy.j.mean / (3.6 * 10^6) * correction.factor.kwh.month * capacity.factor.mean,
+           energy.kwh.high = energy.j.high / (3.6 * 10^6) * correction.factor.kwh.month * capacity.factor.high
     ) %>% 
     mutate(energy.twh.low = energy.kwh.low / 10^9,
            energy.twh.mean = energy.kwh.mean / 10^9,
@@ -128,13 +142,13 @@ for(i in seq(nrow(hydropower.head.info))){
   energy.year.segment.sums <- energy.month.segment.df %>% 
     mutate(datetime=as.Date(datetime)) %>% 
     mutate(datetime=floor_date(datetime,'year')) %>% 
-    group_by(datetime, section.id.unique, country, transfer.name, section.id, reservoir.id, segment.id, hemisphere, head.m) %>% 
+    group_by(datetime, section.id.unique, country, transfer.name, reservoir.id, segment.id, head.m, hemisphere) %>% 
     summarise_at(vars(energy.j.low:energy.twh.high), ~ sum(.x, na.rm = TRUE))
   
   energy.year.segment.means <- energy.month.segment.df %>% 
     mutate(datetime=as.Date(datetime)) %>% 
     mutate(datetime=floor_date(datetime,'year')) %>% 
-    group_by(datetime, section.id.unique, country, transfer.name, section.id, reservoir.id, segment.id, hemisphere, head.m) %>% 
+    group_by(datetime, section.id.unique, country, transfer.name, reservoir.id, segment.id, head.m, hemisphere) %>% 
     summarise_at(vars(energy.m3.kwh.low:energy.m3.kwh.km.high), ~ mean(.x, na.rm = TRUE))
   
   energy.year.segment.df <- inner_join(energy.year.segment.sums, 
@@ -159,3 +173,12 @@ write.csv(energy.df.month,
 write.csv(energy.df.year, 
           paste0(outputDirEnergy, '0_energy_production_yearly.csv'), 
           row.names = F)
+
+# ####james bay project check
+# jbp.check <- hydropower.head.info %>% 
+#   filter(transfer.name == 'James_Bay_Project_Phase_I'|
+#            transfer.name == 'James_Bay_Project_Phase_II'|
+#            transfer.name == 'James_Bay_Project_Rupert')
+# sum(jbp.check$capacity.mw)
+# sum(hydropower.head.info$capacity.mw)
+# sum(hydropower.head.info$head.m)

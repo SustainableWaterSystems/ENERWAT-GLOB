@@ -276,8 +276,8 @@ aqdcts.info.df <- do.call(rbind, all.info.list)
 bypass.info.df <- rbind(tunnel.info.df, aqdcts.info.df)
 
 section.info.sel <- sections.information %>%
-  select(Country, ibwt.project.name, Section, reservoir_ID, Purpose.main) %>%
-  rename(transfer.name = ibwt.project.name,
+  select(Country, ibwt.branch, Section, reservoir_ID, Purpose.main) %>%
+  rename(transfer.name = ibwt.branch,
          section.id = Section,
          reservoir.id = reservoir_ID)
 

@@ -47,35 +47,35 @@ for(i in seq(length(n.countries))){
   #### loop per transfer
   for(j in seq(length(country.transfers))){
     
-    transfer.name <- country.transfers[j]
+    ibwt.branch <- country.transfers[j]
     
     #create output directory for the transfer
-    outputDirTransfer <- paste0(outputDirCountry, transfer.name, '/')
+    outputDirTransfer <- paste0(outputDirCountry, ibwt.branch, '/')
     dir.create(outputDirTransfer, showWarnings = F, recursive = T)
     
     #find dem name associated with specific transfer
     dem.name.transfer <- dem.names$dem.name[
-      dem.names$transfer.name == transfer.name]
+      dem.names$ibwt.branch == ibwt.branch]
     
     #load transfer dem
     dem.raster <- rast(paste0(inputDirDEM, dem.name.transfer, '.tif'))
     
     #### get elevation data of all segments ####
     segments.folder <- paste0(inputDirIBWT, country, '/', 
-                              transfer.name, '/', 'segments/')
+                              ibwt.branch, '/', 'segments/')
     
     segments.n <- list.dirs(segments.folder, full.names = F)[-1]
     
     for(k in seq(length(segments.n))){
       
       replaceMessage(paste0('Country: ', country, ' - ',
-                            'Transfer: ', transfer.name, ' - ',
+                            'Transfer: ', ibwt.branch, ' - ',
                             'Segment: ', k, '/', length(segments.n)))
       
       segment <- segments.n[k]
       
       ibwt.vector.segment <- vect(paste0(
-        inputDirIBWT, country, '/', transfer.name, '/',
+        inputDirIBWT, country, '/', ibwt.branch, '/',
         'segments/', segment, '/', segment, '.shp'))
       
       #### get elevation data ####

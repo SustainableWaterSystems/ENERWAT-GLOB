@@ -19,8 +19,8 @@ outputDir <- paste0(inputDir, '2_infrastructure/')
 dir.create(outputDir, recursive = T, showWarnings = F)
 
 #### load 
-data.sections <- read.csv(paste0(inputDir,'1_bias_corrected/1_0_bias_correction_sections.csv'))
-data.segments <- read.csv(paste0(inputDir,'1_bias_corrected/1_1_bias_correction_segments.csv'))
+data.sections <- read.csv(paste0(inputDir,'1_bias_corrected/2_corrected_sections.csv'))
+data.segments <- read.csv(paste0(inputDir,'1_bias_corrected/2_corrected_segments.csv'))
 data.bypass <- read.csv(paste0(inputDirElevation, '3_information/2_information_bypass.csv'))
 
 
@@ -34,6 +34,8 @@ for(i in seq(nrow(data.bypass))){
   data.segments.filter <- data.segments %>% 
     filter(transfer.name == bypass.select$transfer.name) %>% 
     filter(segment.full == bypass.select$segment.id)
+  
+  if(length(data.segments.filter$Country) == 0){next}
   
   bypass.select.info <- bypass.select %>% 
     mutate(segment.id.unique = data.segments.filter$segment.id.unique,

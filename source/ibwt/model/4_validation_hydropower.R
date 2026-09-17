@@ -4,6 +4,8 @@ library(dplyr)
 library(lubridate)
 library(hydroGOF)
 
+options(warn=1)
+
 inputDir <- '../../../output/ibwt/model/'
 inputDirDischarge <- paste0(inputDir, '1_discharge_timeseries/')
 inputDirEnergy <- paste0(inputDir, '2_energy/')
@@ -121,11 +123,25 @@ for(i in seq(nrow(reservoirs.ibwt.usa))){
   # nrmse.mean.month <- nrmse(ts.validation.df.month$energy.mwh.mean, ts.validation.df.month$turner.mwh)
   # nrmse.high.month <- nrmse(ts.validation.df.month$energy.mwh.high, ts.validation.df.month$turner.mwh)
 
-  kge.low.year <- KGE(ts.validation.df.year$energy.mwh.low, 
+  # kge.low.year <- KGE(ts.validation.df.year$energy.mwh.low, 
+  #                     ts.validation.df.year$turner.mwh, na.rm = T, out.type = 'full')
+  # kge.mean.year <- KGE(ts.validation.df.year$energy.mwh.mean, 
+  #                      ts.validation.df.year$turner.mwh, na.rm = T, out.type = 'full')
+  # kge.high.year <- KGE(ts.validation.df.year$energy.mwh.high, 
+  #                      ts.validation.df.year$turner.mwh, na.rm = T, out.type = 'full')
+  # 
+  # kge.low.year <- KGE(ts.validation.df.year$energy.mwh.low, 
+  #                     ts.validation.df.year$turner.mwh, na.rm = T, out.type = 'full')
+  # kge.mean.year <- KGE(ts.validation.df.year$energy.mwh.mean, 
+  #                      ts.validation.df.year$turner.mwh, na.rm = T, out.type = 'full')
+  # kge.high.year <- KGE(ts.validation.df.year$energy.mwh.high, 
+  #                      ts.validation.df.year$turner.mwh, na.rm = T, out.type = 'full')
+  
+  kge.low.year <- KGEnp(ts.validation.df.year$energy.mwh.low, 
                       ts.validation.df.year$turner.mwh, na.rm = T)
-  kge.mean.year <- KGE(ts.validation.df.year$energy.mwh.mean, 
+  kge.mean.year <- KGEnp(ts.validation.df.year$energy.mwh.mean, 
                        ts.validation.df.year$turner.mwh, na.rm = T)
-  kge.high.year <- KGE(ts.validation.df.year$energy.mwh.high, 
+  kge.high.year <- KGEnp(ts.validation.df.year$energy.mwh.high, 
                        ts.validation.df.year$turner.mwh, na.rm = T)
 
 

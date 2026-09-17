@@ -23,7 +23,10 @@ dir.create(outputDir, recursive = T, showWarnings = F)
 megaprojects.outlets <-
   read_excel(paste0(inputDir, 'geodar_outlets_5arcmin_at_ibwt.xlsx'), sheet = 'Sections') %>%
   mutate_if(is.character, ~na_if(., '')) %>%
-  fill(Country, ibwt.project.name, Purpose.main, Purpose.mixed, initial.year)
+  fill(Country, ibwt.project, ibwt.branch, Purpose.main, Purpose.mixed, initial.year)
+
+length(unique(megaprojects.outlets$ibwt.project))
+length(unique(megaprojects.outlets$ibwt.branch))
 
 zones.5arcmin <- vroom(paste0(inputDirTS, 'maskGlobal.csv')) %>% 
   filter(zone_ID != 0)
@@ -70,7 +73,7 @@ for(i in seq(length(countries.n))){
   country.transfers.sections <- transfer.basedata %>% 
     filter(Country == country) 
   
-  country.transfers <- unique(country.transfers.sections$ibwt.project.name)
+  country.transfers <- unique(country.transfers.sections$ibwt.branch)
   
   country.list <- list()
   
@@ -102,7 +105,7 @@ for(i in seq(length(countries.n))){
       )
       
       colnames(section.info.df) <- 
-        c('ibwt.project.name','Section',
+        c('ibwt.branch','Section',
           'from.lon', 'from.lat', 'to.lon','to.lat')
       
       transfer.sections.list[[k]] <- section.info.df
@@ -124,7 +127,7 @@ for(i in seq(length(countries.n))){
 countries.complete.data <- do.call(rbind, countries.complete.data.list)
 
 plot.df <- merge(transfer.basedata, countries.complete.data) %>% 
-  relocate(Country, .before=ibwt.project.name) %>% 
+  relocate(Country, .before=ibwt.branch) %>%
   arrange(Country)
 
 

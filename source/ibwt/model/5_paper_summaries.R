@@ -8,7 +8,7 @@ inputDirDischarge <- paste0(inputDir, '1_discharge_timeseries/')
 inputDirEnergy <- paste0(inputDir, '2_energy/')
 
 #### load ####
-discharge.yearly <- read.csv(paste0(inputDirDischarge, '1_bias_corrected/2_1_discharge_bias_corrected_yearly.csv'))
+discharge.yearly <- read.csv(paste0(inputDirDischarge, '1_bias_corrected/1_discharge_bias_corrected_yearly.csv'))
 
 energy.production.yearly <- read.csv(paste0(inputDirEnergy, '0_energy_production_yearly.csv'))
 energy.consumption.yearly <- read.csv(paste0(inputDirEnergy, '1_energy_consumption_yearly.csv'))
@@ -26,9 +26,9 @@ bypass.infrastructure <- read.csv(paste0(inputDirDischarge,
 ##### abstract 
 discharge.summary <- discharge.yearly %>% 
   group_by(datetime) %>% 
-  summarise(discharge.km3.y.corrected = sum(discharge.km3.y.corrected))
+  summarise(discharge.km3.year.corrected = sum(discharge.km3.year.corrected))
 
-mean(discharge.summary$discharge.km3.y.corrected)
+mean(discharge.summary$discharge.km3.year.corrected)
 
 length(unique(discharge.yearly$transfer.name))
 length(unique(discharge.yearly$reservoir.id))
@@ -96,6 +96,17 @@ mean(energy.global.last10$twh.mean.c)
 mean(energy.global.last10$twh.high.c)
 
 #### consumption avg per transfer discussion ####
+cap.c <- energy.consumption.yearly %>% 
+  filter(transfer.name == 'Central_Arizona_Project') %>% 
+  group_by(datetime, transfer.name) %>% 
+  summarise(energy.twh.low = sum(energy.twh.low),
+            energy.twh.mean = sum(energy.twh.mean),
+            energy.twh.high = sum(energy.twh.high))
+
+mean(cap.c$energy.twh.low)
+mean(cap.c$energy.twh.mean)
+mean(cap.c$energy.twh.high)
+
 swp.c <- energy.consumption.yearly %>% 
   filter(transfer.name == 'California_State_Water_Project') %>% 
   group_by(datetime, transfer.name) %>% 
@@ -145,6 +156,20 @@ max.transfers.c <- energy.consumption.yearly %>%
   summarise(energy.twh.low = max(energy.twh.low, na.rm=T),
             energy.twh.mean = max(energy.twh.mean,na.rm=T),
             energy.twh.high = max(energy.twh.high,na.rm=T))
+
+
+jbp.hydro <- energy.production.yearly %>% 
+  filter(transfer.name == 'James_Bay_Project_Phase_I'|
+           transfer.name == 'James_Bay_Project_Phase_II'|
+           transfer.name == 'James_Bay_Project_Phase_Rupert') %>% 
+  group_by(country,datetime) %>% 
+  summarise(energy.kwh.low = sum(energy.kwh.low),
+            energy.kwh.mean = sum(energy.kwh.mean),
+            energy.kwh.high = sum(energy.kwh.high),
+            energy.twh.low = sum(energy.twh.low),
+            energy.twh.mean = sum(energy.twh.mean),
+            energy.twh.high = sum(energy.twh.high),
+            )
 
 # avg.transfers.c.gwh <- avg.transfers.c %>%  
 #   mutate(gwh.low = energy.twh.low * 1000,
@@ -339,7 +364,7 @@ summary(consumption.intensity$energy.kwh.m3.high)
 
 transfer.volumes <- discharge.yearly %>% 
   group_by(transfer.name) %>% 
-  summarise(discharge.km3.y.corrected = mean(discharge.km3.y.corrected))
+  summarise(discharge.km3.year.corrected = mean(discharge.km3.year.corrected))
 
 
 ##### decades #####
@@ -438,5 +463,8 @@ mean(first.10$ratio.electricity.high.p, na.rm=T)
 mean(last.10$ratio.electricity.low.p, na.rm=T)
 mean(last.10$ratio.electricity.mean.p, na.rm=T)
 mean(last.10$ratio.electricity.high.p, na.rm=T)
+
+# #### energy growth
+# lm.production <- lm(data=production.2021)
 
 

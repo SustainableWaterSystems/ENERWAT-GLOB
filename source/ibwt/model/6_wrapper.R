@@ -6,10 +6,11 @@ source('0_3_1_get_information_segments.R')
 source('0_3_2_get_information_bypass.R')
 
 
-source('1_0_1_filter_timeseries.R')
+source('1_0_1_process_raw_timeseries.R')
+
 source('1_1_0_add_reservoir_information.R')
-source('1_1_1_bias_correction_factors.R')
-source('1_1_2_bias_correction_discharge.R')
+source('1_1_1_correct_max_discharge.R')
+
 source('1_2_0_get_info_hydropower.R')
 source('1_2_1_get_info_pumping_lift.R')
 source('1_2_2_get_info_bypass_segments.R')
@@ -26,3 +27,4 @@ source('3_2_country_level_ratios.R')
 
 source('4_validation_hydropower.R')
 source('5_paper_summaries.R')
+
