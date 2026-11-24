@@ -36,7 +36,7 @@ sections.coord <- read.csv(paste0(inputDirDischarge, '1_bias_corrected/0_informa
 intakes.coord.hydropower <- read.csv(paste0(inputDirDischarge, '2_infrastructure/0_information_hydropower.csv'))
 intakes.coord.pumping <- read.csv(paste0(inputDirDischarge, '2_infrastructure/1_information_pumping.csv'))
 
-ibwt.info <- read.csv(paste0(inputDirInfo, '1_0_bias_correction_sections.csv'))
+ibwt.info <- read.csv(paste0(inputDirInfo, '0_information_sections.csv'))
 
 #### prepare data ####
 #### timeseries 
@@ -113,10 +113,11 @@ p.map.production <- ggplot() +
   ylim(-55,70) +
   ggtitle('B. Per-transfer energy production (1980-2021)') +
   scale_size_continuous(name = 'Mean energy production (TWh y<sup>-1</sup>)',
-                        breaks=c(1,5,10,20,30),
+                        # breaks=c(1,5,10,20,30),
                         range=c(3,10)) +
   scale_fill_gradient(low="#9167c8", high= "#df88fa", name = 'Production intensity (m<sup>3</sup> kwh<sup>-1</sup>)',
-                      limits = c(0,15)) + 
+                      limits = c(0,5)
+                      ) + 
   theme_map() +
   theme(legend.position = 'bottom',
         legend.direction = 'horizontal',
@@ -146,10 +147,11 @@ p.map.consumption <- ggplot() +
   ylim(-55,70) +
   ggtitle('C. Per-transfer energy consumption (1980-2021)') +
   scale_size_continuous(name = 'Mean energy consumption (TWh y<sup>-1</sup>)',
-                        breaks=c(1,4,8,12,17),
+                        # breaks=c(1,4,8,12,17),
                         range=c(3,10)) +
   scale_fill_gradient(low="#e1af93", high= "#fbdba0", name = 'Consumption intensity (kwh m<sup>3</sup>)',
-                      limits = c(0,3)) + 
+                      limits = c(0,3)
+                      ) + 
   theme_map() +
   theme(legend.position = 'bottom',
         legend.direction = 'horizontal',
@@ -173,3 +175,6 @@ ggsave(paste0(outputDirViz,'ibwt_energy_global.png'), p.energy,
        height=14, width=12, units='in', dpi=300, bg='white')
 
 file.show(paste0(outputDirViz,'ibwt_energy_global.png'))
+
+
+

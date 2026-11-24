@@ -142,7 +142,7 @@ for(i in seq(length(n.countries))){
             point.select <- tunnels.aqueducts.segment[l,]
             
             #match with closest point on transfer path
-            #get coordinates of infrastructure points (to be matched on transfer )
+            #get coordinates of infrastructure points (to be matched on transfer)
             coord.target <- cbind(point.select$lon,
                                   point.select$lat)
             

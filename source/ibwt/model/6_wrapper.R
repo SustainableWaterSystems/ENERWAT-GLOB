@@ -5,11 +5,11 @@ source('0_3_0_get_information_sections.R')
 source('0_3_1_get_information_segments.R')
 source('0_3_2_get_information_bypass.R')
 
-
+#python(1_0_0.py)
 source('1_0_1_process_raw_timeseries.R')
 
 source('1_1_0_add_reservoir_information.R')
-source('1_1_1_correct_max_discharge.R')
+source('1_1_1_correct_discharge_max.R')
 
 source('1_2_0_get_info_hydropower.R')
 source('1_2_1_get_info_pumping_lift.R')
@@ -25,6 +25,8 @@ source('3_0_energy_bugdet.R')
 source('3_1_discharge_by_intake_type.R')
 source('3_2_country_level_ratios.R')
 
-source('4_validation_hydropower.R')
+source('4_0_validation_discharge_siddik.R')
+source('4_1_validation_hydropower.R')
+source('4_2_validation_pumping.R')
 source('5_paper_summaries.R')
 

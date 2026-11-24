@@ -37,7 +37,7 @@ p.p <- ggplot(energy.countries.ts
   scale_color_manual(values = my.palette) +
   xlab('Year')+
   ylab('TWh y<sup>-1</sup>') +
-  ylim(c(0,95)) +
+  ylim(c(0,120)) +
   theme_bw() +
   theme(axis.text = element_text(size=14),
         axis.title = element_text(size=14),
@@ -63,7 +63,7 @@ p.c <- ggplot(energy.countries.ts
   xlab('Year')+
   ylab('TWh y<sup>-1</sup>') +
   scale_y_continuous(position = "right", 
-                     limits = c(0,95)) +
+                     limits = c(0,120)) +
   theme_bw() +
   theme(axis.text = element_text(size=14),
         legend.position = 'bottom',
@@ -90,7 +90,7 @@ p.ratio.p <- ggplot(energy.countries.ts
   scale_color_manual(values = my.palette) +
   xlab('Year')+
   ylab('Ratio (%)') +
-  ylim(c(0,45)) +
+  ylim(c(0,25)) +
   theme_bw() +
   theme(axis.text = element_text(size=14),
         axis.title = element_text(size=14),
@@ -115,7 +115,7 @@ p.ratio.c <- ggplot(energy.countries.ts
   xlab('Year')+
   ylab('Ratio (%)') +
   scale_y_continuous(position = "right", 
-                     limits = c(0,45)) +
+                     limits = c(0,25)) +
   theme_bw() +
   theme(axis.text = element_text(size=14),
         axis.title = element_text(size=14),

@@ -50,6 +50,8 @@ ibwt.reservoir.one <- ibwt.reservoir.count %>%
 ibwt.reservoir.mult <- ibwt.reservoir.count %>% 
   filter(count != 1)
 
+ibwt.paralell.sections <- data.sections %>% 
+  filter(Section.Parallel==1)
 
 # get reservoir ids of transfers with one reservoir
 ids.one.reservoir <- data.sections %>% 
@@ -320,6 +322,7 @@ corrected.segments <- data.segments %>%
 #dataframe with maximum modelled discharge
 max.discharge.df.all <- rbind(max.discharge.df.one,
                               max.discharge.df.mult)
+
 
 
 #### save corrected discharge ####

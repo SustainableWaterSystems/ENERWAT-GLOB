@@ -49,6 +49,12 @@ discharge.last <- p.data.ts %>%
   filter(type == 'km3.total') %>% 
   filter(year(datetime) >= 2012)
 
-discharge.summary <- p.data.ts %>% 
+discharge.summary.first <- p.data.ts %>% 
+  filter(year(datetime) <= 1989) %>% 
+  group_by(type) %>% 
+  summarise(km3 = mean(km3))
+
+discharge.summary.last <- p.data.ts %>% 
+  filter(year(datetime) <= 2012) %>% 
   group_by(type) %>% 
   summarise(km3 = mean(km3))

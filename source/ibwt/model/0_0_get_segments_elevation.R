@@ -92,6 +92,8 @@ for(i in seq(length(n.countries))){
       #length of transfer (m) -> add to table to calculate kwh/km
       segment.length <- perim(ibwt.vector.segment)
       
+      # if(length(segment.length) > 0){segment.length = sum(segment.length)}
+      
       #length of section piece (dem resolution, m)
       unit.length <- segment.length / nrow(elevation.data)
       

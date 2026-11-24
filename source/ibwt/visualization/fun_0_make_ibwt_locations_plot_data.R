@@ -1,7 +1,13 @@
 ####
-ibwt.segments.summarise <- ibwt.segments %>% 
+ibwt.segments.summarise <- ibwt.segments %>%
+  filter(Country != 'Libya') %>% 
   group_by(transfer.name) %>% 
   summarise(transfer.length = sum(segment.length.km)) 
+
+# ibwt.segments.summarise <- ibwt.segments %>% 
+#   filter(Country != 'Libya') %>% 
+#   group_by(transfer.name) %>% 
+#   summarise(transfer.length = sum(segment.length.km)) 
 
 #### gather transfer information ####
 ibwts.list <- list()

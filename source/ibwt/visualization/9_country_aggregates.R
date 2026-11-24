@@ -44,9 +44,9 @@ year.discharge.types$country[which(year.discharge.types$country == 'South_Africa
 
 
 #### functions ####
-source('fun_4_0_country_discharge.R')
-source('fun_4_1_country_energy_budget.R')
-source('fun_4_2_country_energy_intensity.R')
+source('fun_9_0_country_discharge.R')
+source('fun_9_1_country_energy_budget.R')
+source('fun_9_2_country_energy_intensity.R')
 
 #### patch and save ####
 p.energy.combined <- plot_grid(p.10.discharge,

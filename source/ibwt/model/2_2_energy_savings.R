@@ -59,13 +59,25 @@ for(i in seq(nrow(pumping.lift.info))){
   discharge.select.yearly <- discharge.yearly.df %>% 
     filter(section.id.unique == reservoir.id.select)
   
+  
+  #### distribute discharge to parallel routings
+  # if(pumping.select$parallel.count != 0){
+  #   
+  #   discharge.m3.month <- discharge.select.monthly$discharge.m3.month.corrected / pumping.select$parallel.count
+  #   
+  # }
+  # 
+  # else{discharge.m3.month <- discharge.select.monthly$discharge.m3.month.corrected}
+  
+  discharge.m3.month <- discharge.select.monthly$discharge.m3.month.corrected
+  
   #### monthly ####
   energy.j.low.month <- 
-    discharge.select.monthly$discharge.m3.month * 
+    discharge.m3.month * 
     (g * pumping.select$net.bypass) * (rho * delta.time) / p.efficiency.high
   
   energy.j.high.month <- 
-    discharge.select.monthly$discharge.m3.month * 
+    discharge.m3.month * 
     (g * pumping.select$net.bypass) * (rho * delta.time) / p.efficiency.low
   
   #tidy dataframe monthly
@@ -91,13 +103,13 @@ for(i in seq(nrow(pumping.lift.info))){
   energy.year.segment.sums <- energy.month.segment.df %>% 
     mutate(datetime=as.Date(datetime)) %>% 
     mutate(datetime=floor_date(datetime,'year')) %>% 
-    group_by(datetime, section.id.unique, country, transfer.name, reservoir.id, segment.id, bypass.type) %>% 
+    group_by(datetime, section.id.unique, country, transfer.name, reservoir.id, segment.id, hemisphere, bypass.type) %>% 
     summarise_at(vars(discharge.m3.s:energy.twh.high), ~ sum(.x, na.rm = TRUE))
   
   energy.year.segment.means <- energy.month.segment.df %>% 
     mutate(datetime=as.Date(datetime)) %>% 
     mutate(datetime=floor_date(datetime,'year')) %>% 
-    group_by(datetime, section.id.unique, country, transfer.name, reservoir.id, segment.id, bypass.type) %>% 
+    group_by(datetime, section.id.unique, country, transfer.name, reservoir.id, segment.id, hemisphere, bypass.type) %>% 
     summarise_at(vars(energy.kwh.m3.low:energy.kwh.m3.high), ~ mean(.x, na.rm = TRUE))
   
   energy.year.segment.df <- inner_join(energy.year.segment.sums, 

@@ -22,6 +22,10 @@ sections.information <- read.csv(paste0(outputDir, '0_0_sections_reservoirs.csv'
 sections.unmatched <- read.csv(paste0(outputDir, '0_1_sections_unmatched.csv'))
 
 #### process ####
+parallel.sections.count <- sections.information %>% 
+  filter(Section.Parallel == 1) %>% 
+  group_by(reservoir_ID) %>% 
+  summarise(count=n())
 
 n.countries <- list.dirs(inputDirElevation, full.names = F, recursive = F)
 
@@ -62,6 +66,16 @@ for(i in seq(length(n.countries))){
       intake.type <- segment.elevation.data$Subject[1]
       reservoir.id <- transfer.sections$reservoir_ID[
         which(transfer.sections$Section == unique(segment.elevation.data$section.id))]
+      
+      segment.parallel <- transfer.sections$Section.Parallel[
+        which(transfer.sections$Section == unique(segment.elevation.data$section.id))]
+      
+      section.paralell.count <- parallel.sections.count$count[
+        which(parallel.sections.count$reservoir_ID == reservoir.id)]
+      
+      
+      if(length(segment.parallel)==0){segment.parallel=0}
+      if(length(section.paralell.count)==0){section.paralell.count=0}
 
       segment.info.df <- data.frame(
         unique(segment.elevation.data$segment.full),
@@ -70,11 +84,14 @@ for(i in seq(length(n.countries))){
         intake.type,
         round(segment.elevation.data$lon[1], 2),
         round(segment.elevation.data$lat[1], 2),
-        round(unique(segment.elevation.data$segment.length.km),2)
+        round(unique(segment.elevation.data$segment.length.km),2),
+        segment.parallel,
+        section.paralell.count
         )
      
       colnames(segment.info.df) <- c('segment.full', 'section.id', 'segment.id', 
-                                'intake.type','intake.lon','intake.lat', 'segment.length.km')
+                                'intake.type','intake.lon','intake.lat', 'segment.length.km',
+                                'segment.parallel', 'parallel.count')
       
       list.segments[[k]] <- segment.info.df 
       
@@ -106,7 +123,7 @@ for(i in seq(length(n.countries))){
 intake.dataframe.df <- do.call(rbind, list.countries)
 
 section.info.sel <- sections.information %>% 
-  select(Country, ibwt.branch, initial.year, 
+  select(Country, ibwt.project, ibwt.branch, initial.year, 
          Section, reservoir_ID, Purpose.main,
          lon, lat) %>% 
   rename(transfer.name = ibwt.branch,

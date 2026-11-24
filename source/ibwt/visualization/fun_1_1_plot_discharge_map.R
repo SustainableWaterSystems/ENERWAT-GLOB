@@ -73,7 +73,7 @@ peak.season.all.df <- do.call(rbind, seasons.list)
 #### yearly stuff
 discharge.summarise <- discharge.yearly.df %>%
   group_by(reservoir.id) %>%
-  summarise(discharge.mean = mean(discharge.km3.y.corrected)) %>% 
+  summarise(discharge.mean = mean(discharge.km3.year.corrected)) %>% 
   inner_join(sections.coord %>% select(reservoir.id, lon, lat)) %>% 
   inner_join(peak.season.all.df)
 
@@ -90,7 +90,7 @@ for(i in seq(length(sections.unique))){
   discharge.select.idx <- discharge.select %>% 
     mutate(idx = seq(nrow(discharge.select)))
   
-  discharge.year.lm <- lm(discharge.km3.y.corrected~idx, data=discharge.select.idx)
+  discharge.year.lm <- lm(discharge.km3.year.corrected~idx, data=discharge.select.idx)
   
   lm.tidy <- broom::tidy(discharge.year.lm)
   
@@ -111,6 +111,17 @@ p.data.map <- discharge.summarise %>%
   inner_join(trends.df) %>% 
   mutate(trend.sign = case_when(trend > 0 ~ "positive",
                                 trend < 0 ~ "negative"))
+
+reservoir.decrease <- trends.df %>% 
+  filter(trend < 0) %>% 
+  mutate(trend.m3.y = trend * 10^9)
+
+reservoir.decrease.sign <- reservoir.decrease %>% 
+  filter(p.value < 0.05)
+
+summary(reservoir.decrease$trend)
+summary(reservoir.decrease.sign$trend)
+summary(reservoir.decrease.sign$trend.m3.y)
 
 
 #### plot #### 
@@ -137,7 +148,9 @@ p.map.discharge <- ggplot() +
   scale_shape_manual(values = c("positive" = 24, "negative" = 25),
                      name = 'Trend',
                      labels = c('Positive','Negative')) +
-  scale_size_continuous(name = 'Mean discharge (km<sup>3</sup> y<sup>-1</sup>)') +
+  scale_size_continuous(name = 'Mean discharge (km<sup>3</sup> y<sup>-1</sup>)',
+                        breaks=c(1,3,6,9,12,15),
+                        range=c(2,8)) +
   scale_fill_manual(values = palette.map, name = 'Peak season',
                     labels = c('JFM','AMJ','JAS','OND')
                     ) +

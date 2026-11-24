@@ -7,12 +7,12 @@ seasonal.data.south <- discharge.monthly.df %>%
 
 transfer.discharges.mean <- discharge.yearly.df %>% 
   group_by(transfer.name) %>% 
-  summarise(discharge.km3.mean = mean(discharge.km3.y.corrected)
+  summarise(discharge.km3.mean = mean(discharge.km3.year.corrected)
   )
 
 discharge.plot.data.y <- discharge.yearly.df %>% 
   group_by(datetime) %>% 
-  summarise(discharge.km3.y.corrected = sum(discharge.km3.y.corrected)) %>%
+  summarise(discharge.km3.year.corrected = sum(discharge.km3.year.corrected)) %>%
   mutate(idx = seq(42))
 
 discharge.first.10 <- discharge.plot.data.y %>% 

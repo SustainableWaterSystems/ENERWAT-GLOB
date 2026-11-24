@@ -19,8 +19,8 @@ outputDir <- '../../../output/ibwt/visualization/'
 dir.create(outputDir, recursive = T, showWarnings = F)
 
 #### ####
-ibwt.info <- read.csv(paste0(inputDir, '1_0_bias_correction_sections.csv'))
-ibwt.segments <- read.csv(paste0(inputDir, '1_1_bias_correction_segments.csv'))
+ibwt.info <- read.csv(paste0(inputDir, '0_information_sections.csv'))
+ibwt.segments <- read.csv(paste0(inputDir, '0_information_segments.csv'))
 
 wg <- map_data("world")
 
@@ -29,7 +29,13 @@ ibwt.names <- unique(ibwt.info$transfer.name)
 ####
 source('fun_0_make_ibwt_locations_plot_data.R')
 
-#### plot ####
+reservoirs.projects <- ibwt.info %>% 
+  group_by(ibwt.project) %>% 
+  summarise(reservoirs=unique(reservoir.id)) %>% 
+  group_by(ibwt.project) %>% 
+  summarise(count=n())
+
+#### plot ######## plot ###reservoir.id#
 ###Inter-basin transfer locations
 p.map <- ggplot() +
   geom_map(
@@ -59,7 +65,7 @@ p.map <- ggplot() +
   scale_fill_gradient(low = 'darkolivegreen4', high = 'gold1',
                       limits = c(0,1500)) +
   scale_size(name="Number of reservoirs",
-             breaks=c(1,2,3,5,6),
+             breaks=c(1,3,5,7),
              range=c(2,6)) +
   guides(color=guide_legend(title="Main purpose"),
          fill=guide_colorbar(title="Project length (km)", direction = 'horizontal',

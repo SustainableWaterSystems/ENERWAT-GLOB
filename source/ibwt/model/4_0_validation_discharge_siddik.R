@@ -2,6 +2,7 @@ rm(list=ls())
 
 library(dplyr)
 library(lubridate)
+library(hydroGOF)
 library(readxl)
 library(tidyr)
 
@@ -39,6 +40,8 @@ siddik.ids <- unique(siddik.magni$Link_ID)
 
 df.compare.yearly.list <- list()
 df.compare.monthly.list <- list()
+
+reviewer.2.list <- list()
 
 #### do timeseries one by one ####
 for(i in seq(nrow(siddik.magni))){
@@ -82,6 +85,7 @@ for(i in seq(nrow(siddik.magni))){
     group_by(datetime) %>%
     summarise(discharge.km3.y = sum(discharge.m3.d) / 10^9) %>% 
     rename(discharge.siddik = discharge.km3.y)
+
   
   #compare with model
   df.compare.yearly <- inner_join(ts.siddik.yearly, ts.model.yearly)
@@ -90,11 +94,74 @@ for(i in seq(nrow(siddik.magni))){
   df.compare.yearly.list[[i]] <- df.compare.yearly
   df.compare.monthly.list[[i]] <- df.compare.monthly
   
+  #### MORE INFORMATION for reviewer 2
   
+  year.first <- df.compare.yearly$datetime[1]
+  year.last <- df.compare.yearly$datetime[nrow(df.compare.yearly)]
+  n.months <- nrow(df.compare.monthly)
+  n.years <- nrow(df.compare.yearly)
+  
+  nrmse.og.yearly <- 
+    sqrt(mean((df.compare.yearly$discharge.siddik - df.compare.yearly$discharge.model.original)^2, 
+              na.rm = TRUE)) / mean(df.compare.yearly$discharge.siddik)
+  
+  nrmse.corrected.yearly <- 
+    sqrt(mean((df.compare.yearly$discharge.siddik - df.compare.yearly$discharge.model.corrected)^2, 
+              na.rm = TRUE)) / mean(df.compare.yearly$discharge.siddik)
+  
+  nrmse.og.monthly <- 
+    sqrt(mean((df.compare.monthly$discharge.siddik - df.compare.monthly$discharge.model.original)^2, 
+              na.rm = TRUE)) / mean(df.compare.monthly$discharge.siddik)
+  
+  nrmse.corrected.monthly <- 
+    sqrt(mean((df.compare.monthly$discharge.siddik - df.compare.monthly$discharge.model.corrected)^2, 
+              na.rm = TRUE)) / mean(df.compare.monthly$discharge.siddik)
+  
+  
+  kge.og.month <- KGEnp(df.compare.monthly$discharge.siddik, 
+                         df.compare.monthly$discharge.model.original, na.rm = T)
+  kge.corrected.month <- KGEnp(df.compare.monthly$discharge.siddik, 
+                          df.compare.monthly$discharge.model.corrected, na.rm = T)
+  
+  kge.og.year <- KGEnp(df.compare.yearly$discharge.siddik, 
+                        df.compare.yearly$discharge.model.original, na.rm = T)
+  kge.corrected.year <- KGEnp(df.compare.yearly$discharge.siddik, 
+                         df.compare.yearly$discharge.model.corrected, na.rm = T)
+  
+  mean.yearly.obs <- mean(df.compare.yearly$discharge.siddik)
+  mean.monthly.obs <- mean(df.compare.monthly$discharge.siddik)
+  
+  basic.info.df <- data.frame(
+    id.siddik.ts,
+    year.first,
+    year.last,
+    n.months,
+    n.years,
+    mean.yearly.obs,
+    mean.monthly.obs,
+    kge.og.month,
+    kge.corrected.month,
+    nrmse.og.monthly,
+    nrmse.corrected.monthly,
+    kge.og.year,
+    kge.corrected.year,
+    nrmse.og.yearly,
+    nrmse.corrected.yearly
+
+    
+  )
+  
+  reviewer.2.list[[i]] <- basic.info.df
+
 }
 
 df.compare.all.yearly <- do.call(rbind, df.compare.yearly.list)
 df.compare.all.monthly <- do.call(rbind, df.compare.monthly.list)
+
+reviewer.2.df <- do.call(rbind, reviewer.2.list) %>% 
+  inner_join(siddik.magni %>% 
+               select(Link_ID, transfer.name) %>% 
+               rename(id.siddik.ts = Link_ID))
 
 write.csv(df.compare.all.monthly, 
           paste0(inputDirBias, '3_validation_siddik_monthly.csv'), row.names = F)

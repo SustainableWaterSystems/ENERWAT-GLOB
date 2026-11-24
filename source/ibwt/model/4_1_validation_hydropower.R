@@ -81,6 +81,7 @@ turner.shah.ibwt <- turner.shah %>%
 kge.list.month <- list()
 kge.list.year <- list()
 
+
 for(i in seq(nrow(reservoirs.ibwt.usa))){
 
   reservoir.select <- reservoirs.ibwt.usa[i,]
@@ -107,35 +108,13 @@ for(i in seq(nrow(reservoirs.ibwt.usa))){
   ts.validation.df.month <- inner_join(ts.turner.month, ts.modelled.month)
   ts.validation.df.year <- inner_join(ts.turner.year, ts.modelled.year)
 
-  # nse.low.month <- NSE(ts.validation.df.month$energy.mwh.low, ts.validation.df.month$turner.mwh)
-  # nse.mean.month <- NSE(ts.validation.df.month$energy.mwh.mean, ts.validation.df.month$turner.mwh)
-  # nse.high.month <- NSE(ts.validation.df.month$energy.mwh.high, ts.validation.df.month$turner.mwh)
 
-
-  kge.low.month <- KGE(ts.validation.df.month$energy.mwh.low, 
+  kge.low.month <- KGEnp(ts.validation.df.month$energy.mwh.low, 
                        ts.validation.df.month$turner.mwh, na.rm = T)
-  kge.mean.month <- KGE(ts.validation.df.month$energy.mwh.mean, 
+  kge.mean.month <- KGEnp(ts.validation.df.month$energy.mwh.mean, 
                         ts.validation.df.month$turner.mwh, na.rm = T)
-  kge.high.month <- KGE(ts.validation.df.month$energy.mwh.high, 
+  kge.high.month <- KGEnp(ts.validation.df.month$energy.mwh.high, 
                         ts.validation.df.month$turner.mwh, na.rm = T)
-
-  # nrmse.low.month <- nrmse(ts.validation.df.month$energy.mwh.low, ts.validation.df.month$turner.mwh)
-  # nrmse.mean.month <- nrmse(ts.validation.df.month$energy.mwh.mean, ts.validation.df.month$turner.mwh)
-  # nrmse.high.month <- nrmse(ts.validation.df.month$energy.mwh.high, ts.validation.df.month$turner.mwh)
-
-  # kge.low.year <- KGE(ts.validation.df.year$energy.mwh.low, 
-  #                     ts.validation.df.year$turner.mwh, na.rm = T, out.type = 'full')
-  # kge.mean.year <- KGE(ts.validation.df.year$energy.mwh.mean, 
-  #                      ts.validation.df.year$turner.mwh, na.rm = T, out.type = 'full')
-  # kge.high.year <- KGE(ts.validation.df.year$energy.mwh.high, 
-  #                      ts.validation.df.year$turner.mwh, na.rm = T, out.type = 'full')
-  # 
-  # kge.low.year <- KGE(ts.validation.df.year$energy.mwh.low, 
-  #                     ts.validation.df.year$turner.mwh, na.rm = T, out.type = 'full')
-  # kge.mean.year <- KGE(ts.validation.df.year$energy.mwh.mean, 
-  #                      ts.validation.df.year$turner.mwh, na.rm = T, out.type = 'full')
-  # kge.high.year <- KGE(ts.validation.df.year$energy.mwh.high, 
-  #                      ts.validation.df.year$turner.mwh, na.rm = T, out.type = 'full')
   
   kge.low.year <- KGEnp(ts.validation.df.year$energy.mwh.low, 
                       ts.validation.df.year$turner.mwh, na.rm = T)
@@ -153,23 +132,40 @@ for(i in seq(nrow(reservoirs.ibwt.usa))){
   # nrmse.mean.year <- nrmse(ts.validation.df.month$energy.mwh.mean, ts.validation.df.month$turner.mwh)
   # nrmse.high.year <- nrmse(ts.validation.df.month$energy.mwh.high, ts.validation.df.month$turner.mwh)
 
-  kge.df.month <- data.frame(reservoir.select$section.id.unique,
+  year.first <- ts.validation.df.year$datetime[1]
+  year.last <- ts.validation.df.year$datetime[nrow(ts.validation.df.year)]
+  
+  if(length(year.last) == 0){
+    
+    year.first <- NA
+    year.last <- NA
+    
+  }
+  
+  
+  kge.df.month <- data.frame(year.first,
+                             year.last,
+                             reservoir.select$section.id.unique,
                        reservoir.select$id.shah2025,
                        reservoir.select$transfer.name,
+                       reservoir.select$plant.name,
                        kge.low.month, kge.mean.month, kge.high.month,
                        # nse.low.month, nse.mean.month, nse.high.month,
                        reservoir.select$plant.type,
                        reservoir.select$capacity.mw)
 
-  kge.df.year <- data.frame(reservoir.select$section.id.unique,
+  kge.df.year <- data.frame(year.first,
+                            year.last,reservoir.select$section.id.unique,
                              reservoir.select$id.shah2025,
                             reservoir.select$transfer.name,
+                            reservoir.select$plant.name,
                              kge.low.year, kge.mean.year, kge.high.year,
                             # nse.low.year, nse.mean.year, nse.high.year,
                             reservoir.select$plant.type,
                             reservoir.select$capacity.mw)
 
-
+  
+  # year.list[[i]] <- year.df
 
   kge.list.month[[i]] <- kge.df.month
   kge.list.year[[i]] <- kge.df.year
@@ -177,18 +173,3 @@ for(i in seq(nrow(reservoirs.ibwt.usa))){
 
 kge.usa.df.month <- do.call(rbind, kge.list.month)
 kge.usa.df.year <- do.call(rbind, kge.list.year)
-
-
-# kge.usa.df.month.sto <- kge.usa.df.month %>%
-#   filter(reservoir.select.plant.type == 'STO')
-# 
-# kge.usa.df.year.sto <- kge.usa.df.year %>%
-#   filter(reservoir.select.plant.type == 'STO')
-
-# summary(kge.usa.df.month.sto$kge.low.month)
-# summary(kge.usa.df.month.sto$kge.mean.month)
-# summary(kge.usa.df.month.sto$kge.high.month)
-# 
-# summary(kge.usa.df.year.sto$kge.low.year)
-# summary(kge.usa.df.year.sto$kge.mean.year)
-# summary(kge.usa.df.year.sto$kge.high.year)

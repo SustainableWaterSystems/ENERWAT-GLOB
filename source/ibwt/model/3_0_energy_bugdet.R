@@ -22,35 +22,35 @@ energy.savings.yearly <- read.csv(paste0(inputDir, '2_energy/2_energy_savings_ye
 energy.consumption.summarise.month <- energy.consumption.monthly %>% 
   group_by(datetime, transfer.name, country) %>% 
   summarise(discharge.km3.month.c = mean(discharge.km3.month),
-            twh.low.c = sum(energy.twh.low),
-            twh.mean.c = sum(energy.twh.mean),
-            twh.high.c = sum(energy.twh.high)
+            twh.low.c = sum(energy.twh.low, na.rm = T),
+            twh.mean.c = sum(energy.twh.mean, na.rm = T),
+            twh.high.c = sum(energy.twh.high, na.rm = T)
   )
 
 energy.production.summarise.month <- energy.production.monthly %>% 
   group_by(datetime, transfer.name, country) %>% 
-  summarise(discharge.km3.month.p = mean(discharge.km3.month),
-            twh.low.p = sum(energy.twh.low),
-            twh.mean.p = sum(energy.twh.mean),
-            twh.high.p = sum(energy.twh.high)
+  summarise(discharge.km3.month.p = mean(discharge.m3.month / 10^9),
+            twh.low.p = sum(energy.twh.low, na.rm = T),
+            twh.mean.p = sum(energy.twh.mean, na.rm = T),
+            twh.high.p = sum(energy.twh.high, na.rm = T)
   )
 
 energy.consumption.summarise.year <- energy.consumption.yearly %>% 
   group_by(datetime, transfer.name, country) %>% 
   # summarise(discharge.km3.y.c = mean(discharge.km3.y.corrected),
   summarise(
-            twh.low.c = sum(energy.twh.low),
-            twh.mean.c = sum(energy.twh.mean),
-            twh.high.c = sum(energy.twh.high)
+            twh.low.c = sum(energy.twh.low, na.rm = T),
+            twh.mean.c = sum(energy.twh.mean, na.rm = T),
+            twh.high.c = sum(energy.twh.high, na.rm = T)
             )
 
 energy.production.summarise.year <- energy.production.yearly %>% 
   group_by(datetime, transfer.name, country) %>% 
   # summarise(discharge.km3.y.p = mean(discharge.km3.y.corrected),
   summarise(
-            twh.low.p = sum(energy.twh.low),
-            twh.mean.p = sum(energy.twh.mean),
-            twh.high.p = sum(energy.twh.high)
+            twh.low.p = sum(energy.twh.low, na.rm = T),
+            twh.mean.p = sum(energy.twh.mean, na.rm = T),
+            twh.high.p = sum(energy.twh.high, na.rm = T)
   )
 
 

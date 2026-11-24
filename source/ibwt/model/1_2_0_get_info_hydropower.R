@@ -102,11 +102,32 @@ ibwt.shah.df <- do.call(rbind, list.country.matches)
 
 ####  if head does is not reported use dam height ####
 #### if both head and dam height dont exist -> remove hydropower plant ?
-ibwt.shah.df.heads <- ibwt.shah.df %>%
-  filter(!is.na(dam.height.m) | !is.na(head.m)) 
+# ibwt.shah.df.heads <- ibwt.shah.df %>%
+#   filter(!is.na(dam.height.m) | !is.na(head.m)) 
 
-ibwt.shah.df.heads$head.m[is.na(ibwt.shah.df.heads$head.m)] <- 
-  ibwt.shah.df.heads$dam.height[is.na(ibwt.shah.df.heads$head.m)]
+ibwt.shah.df.heads <- ibwt.shah.df %>%
+  filter(!is.na(head.m)) 
+
+ibwt.shah.dam.height.only <- setdiff(ibwt.shah.df, ibwt.shah.df.heads)
+
+# ibwt.shah.df.heads$head.m[is.na(ibwt.shah.df.heads$head.m)] <- 
+#   ibwt.shah.df.heads$dam.height[is.na(ibwt.shah.df.heads$head.m)]
 
 
 write.csv(ibwt.shah.df.heads, paste0(outputDir, '0_information_hydropower.csv'), row.names = F)
+
+####
+cum.capacity.heads <- ibwt.shah.df.heads %>% 
+  group_by(transfer.name) %>% 
+  summarise(capacity.mw = sum(capacity.mw),
+            n.plants=n())
+
+cum.capacity.dam <- ibwt.shah.dam.height.only %>% 
+  group_by(transfer.name) %>% 
+  summarise(capacity.mw = sum(capacity.mw),
+            n.plants=n())
+
+sum(cum.capacity.dam$capacity.mw)
+sum(cum.capacity.heads$capacity.mw)
+sum(cum.capacity.dam$n.plants)
+sum(cum.capacity.heads$n.plants)

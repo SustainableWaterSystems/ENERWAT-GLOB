@@ -110,3 +110,9 @@ for(i in seq(length(n.countries))){
 pumping.dataframe.df <- do.call(rbind, list.countries)
 
 write.csv(pumping.dataframe.df, paste0(outputDir, '1_information_pumping.csv'), row.names = F)
+
+#### 
+cum.pumping <- pumping.dataframe.df %>% 
+  group_by(transfer.name) %>% 
+  summarise(count=n(),
+            elevation.lift = sum(elevation.lift))

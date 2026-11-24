@@ -190,8 +190,11 @@ p.intensity.p <- ggplot(intensity.plot.df.p %>%
                     labels = c('m<sup>3</sup> kWh<sup>-1</sup>',
                                'm<sup>3</sup> kWh<sup>-1</sup> km<sup>-1</sup>')) +
   scale_y_continuous(
-    sec.axis = sec_axis(~./scaling.factor.plot.p, name = 'm<sup>3</sup> kWh<sup>-1</sup> km<sup>-1</sup><br />'),
-    limits=c(0,20)) +
+    sec.axis = sec_axis(~./scaling.factor.plot.p, 
+                        name = 'm<sup>3</sup> kWh<sup>-1</sup> km<sup>-1</sup><br />')
+    # ,
+    # limits=c(0,20)
+    ) +
   theme_bw() +
   theme(axis.title.y = element_markdown(size=14),
         plot.title = element_text(hjust = 0.5, size=16),

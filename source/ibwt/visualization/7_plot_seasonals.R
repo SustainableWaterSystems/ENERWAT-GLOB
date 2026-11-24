@@ -18,13 +18,13 @@ wg <- map_data("world")
 
 #### load ####
 section.info.df <- read.csv(
-  paste0(inputDirDischarge, '1_bias_corrected/1_0_bias_correction_sections.csv'))
+  paste0(inputDirDischarge, '1_bias_corrected/2_corrected_sections.csv'))
 sections.reservoirs <- read.csv(
   paste0(inputDirElevation, '0_0_sections_reservoirs.csv'))
 
 discharge.monthly.df <- read.csv(
   paste0(inputDirDischarge, 
-         '1_bias_corrected/2_0_discharge_bias_corrected_monthly.csv')) %>% 
+         '1_bias_corrected/1_discharge_bias_corrected_monthly.csv')) %>% 
   mutate(datetime = as.Date(datetime)) %>% 
   mutate(
     year.continuous = (year(datetime)),
@@ -33,7 +33,7 @@ discharge.monthly.df <- read.csv(
 
 discharge.yearly.df <- read.csv(
   paste0(inputDirDischarge, 
-         '1_bias_corrected/2_1_discharge_bias_corrected_yearly.csv')) %>% 
+         '1_bias_corrected/1_discharge_bias_corrected_yearly.csv')) %>% 
   mutate(datetime = as.Date(datetime))
 
 segments.info <- read.csv(paste0(inputDirDischarge, '2_infrastructure/1_information_pumping.csv'))
@@ -60,9 +60,9 @@ month.hydropower <- read.csv(paste0(inputDirEnergy, '0_energy_production_monthly
     date = update(datetime, year = 1)  # use a constant year for the x-axis
   )
 
-source('fun_6_0_plot_seasonal_discharge.R')
-source('fun_6_1_plot_seasonal_energy_production.R')
-source('fun_6_2_plot_seasonal_energy_consumption.R')
+source('fun_7_0_plot_seasonal_discharge.R')
+source('fun_7_1_plot_seasonal_energy_production.R')
+source('fun_7_2_plot_seasonal_energy_consumption.R')
 
 p.production.legend <- ggplot(month.production.south, aes(x=date, y=energy.twh.mean, color = year.continuous)) +
   geom_line(alpha=0.1) +

@@ -171,6 +171,10 @@ jbp.hydro <- energy.production.yearly %>%
             energy.twh.high = sum(energy.twh.high),
             )
 
+summary(jbp.hydro$energy.twh.low)
+summary(jbp.hydro$energy.twh.mean)
+summary(jbp.hydro$energy.twh.high)
+
 # avg.transfers.c.gwh <- avg.transfers.c %>%  
 #   mutate(gwh.low = energy.twh.low * 1000,
 #          gwh.mean = energy.twh.mean * 1000,
@@ -314,17 +318,16 @@ sum(energy.savings.mean$energy.twh.high)
 # sum(reservoirs.ibwt$head.m)
 
 hydropower.intensity <- energy.production.yearly %>% 
-  group_by(transfer.name, section.id.unique) %>% 
+  group_by(transfer.name, reservoir.id, segment.id) %>% 
   summarise(energy.m3.kwh.low = mean(energy.m3.kwh.low, na.rm=T),
             energy.m3.kwh.mean = mean(energy.m3.kwh.mean, na.rm=T),
             energy.m3.kwh.high = mean(energy.m3.kwh.high,  na.rm=T)
-  )
+  ) %>% 
+  filter(energy.m3.kwh.low != Inf) 
 
 summary(hydropower.intensity$energy.m3.kwh.low)
 summary(hydropower.intensity$energy.m3.kwh.mean)
 summary(hydropower.intensity$energy.m3.kwh.high)
-
-
 
 
 consumption.intensity <- energy.consumption.yearly %>% 
@@ -465,6 +468,31 @@ mean(last.10$ratio.electricity.mean.p, na.rm=T)
 mean(last.10$ratio.electricity.high.p, na.rm=T)
 
 # #### energy growth
-# lm.production <- lm(data=production.2021)
+summary(hydropower.intensity$energy.m3.kwh.low)
+# summary(hydropower.intensity$energy.m3.kwh.mean)
+summary(hydropower.intensity$energy.m3.kwh.high)
 
+
+
+### 
+mean(energy.countries.stuff$ratio.electricity.low.p)
+mean(energy.countries.stuff$ratio.electricity.mean.p)
+mean(energy.countries.stuff$ratio.electricity.high.p)
+
+### snowym ountains scheme
+sms.hydro <- energy.production.yearly %>% 
+  filter(transfer.name == 'Snowy_Mountains_Scheme_Murray' | 
+           transfer.name == 'Snowy_Mountains_Scheme_Murrumbidgee' ) %>% 
+  group_by(country,datetime) %>% 
+  summarise(energy.kwh.low = sum(energy.kwh.low),
+            energy.kwh.mean = sum(energy.kwh.mean),
+            energy.kwh.high = sum(energy.kwh.high),
+            energy.twh.low = sum(energy.twh.low),
+            energy.twh.mean = sum(energy.twh.mean),
+            energy.twh.high = sum(energy.twh.high),
+  )
+
+summary(sms.hydro$energy.twh.low)
+summary(sms.hydro$energy.twh.mean)
+summary(sms.hydro$energy.twh.high)
 

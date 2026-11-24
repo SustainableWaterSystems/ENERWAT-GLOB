@@ -61,13 +61,22 @@ for(i in seq(nrow(pumping.lift.info))){
   discharge.select.yearly <- discharge.yearly.df %>% 
     filter(section.id.unique == reservoir.id.select)
   
+  #### distribute discharge to parallel routings
+  if(pumping.select$parallel.count != 0){
+    
+    discharge.m3.month <- discharge.select.monthly$discharge.m3.month.corrected / pumping.select$parallel.count
+    
+  }
+  
+  else{discharge.m3.month <- discharge.select.monthly$discharge.m3.month.corrected}
+  
   #### monthly ####
   energy.j.low.month <- 
-    discharge.select.monthly$discharge.km3.month.corrected * 10^9 *
+    discharge.m3.month *
     (g * pumping.select$elevation.lift) * (rho * delta.time) / p.efficiency.high
   
   energy.j.high.month <- 
-    discharge.select.monthly$discharge.km3.month.corrected * 10^9 *
+    discharge.m3.month *
     (g * pumping.select$elevation.lift) * (rho * delta.time) / p.efficiency.low
   
   #tidy dataframe monthly

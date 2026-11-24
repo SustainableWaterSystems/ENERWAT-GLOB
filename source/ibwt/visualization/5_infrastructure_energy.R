@@ -80,8 +80,8 @@ p.data <- rbind(production.plot.data.y,
                 consumption.plot.data.y
                 )
 
-source('fun_8_0_plot_map_production.R')
-source('fun_8_1_plot_map_consumption.R')
+source('fun_5_0_plot_map_production.R')
+source('fun_5_1_plot_map_consumption.R')
 
 
 p.energy.mix <- plot_grid(p.map.hydropower, p.map.pumping, nrow=2)
