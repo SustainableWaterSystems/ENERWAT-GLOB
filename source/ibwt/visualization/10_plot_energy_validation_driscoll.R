@@ -29,15 +29,17 @@ p.driscoll <- ggplot(validation.driscoll)+
   xlim(c(0,10))+
   ylim(c(0,10))+
   theme_bw() +
-  theme(axis.title = element_markdown(),
+  theme(axis.title = element_markdown(size=16),
+        axis.text = element_text(size=16),
         legend.position = 'bottom',
         legend.title.position = 'top',
-        legend.title = element_text(hjust=0.5)) +
-  guides(shape=guide_legend(title="Inter-basin water transfer", override.aes = list(size = 3)))
+        legend.title = element_text(hjust=0.5, size=16),
+        legend.text = element_text(size=14)) +
+  guides(color=guide_legend(title="Inter-basin water transfer", override.aes = list(size = 3)))
 
 
 ggsave(paste0(outputDirViz,'validation_energy_driscoll.png'), p.driscoll,
-       height=5, width=8, units='in', dpi=300, bg='white')
+       height=7, width=10, units='in', dpi=300, bg='white')
 
 file.show(paste0(outputDirViz,'validation_energy_driscoll.png'))
 
